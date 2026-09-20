@@ -1,0 +1,36 @@
+# Environments
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+
+# Data (large / re-downloadable; provenance is documented in docs/data_dictionary.md)
+data/raw/*
+data/external/*
+data/processed/*
+!data/raw/.gitkeep
+!data/external/.gitkeep
+!data/processed/.gitkeep
+
+# Secrets / machine-specific
+.env
+*.key
+*.pem
+credentials*.json
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+~$*
+
+# Large generated artefacts (keep small tables/figures)
+results/models/*.pkl
+results/models/*.joblib
