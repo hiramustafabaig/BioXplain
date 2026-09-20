@@ -1,0 +1,283 @@
+{
+  "files": {
+    "GSE42568": {
+      "path": "data\\raw\\GSE42568\\GSE42568_series_matrix.txt.gz",
+      "bytes": 22565943,
+      "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+      "decompressed_bytes": 79859027
+    },
+    "GSE65194": {
+      "path": "data\\external\\GSE65194\\GSE65194_series_matrix.txt.gz",
+      "bytes": 76464351,
+      "sha256": "f92d2109fe0d64ed056d9673e8733b2af25173230f3632e370201b6a4054caba",
+      "decompressed_bytes": 165378449
+    },
+    "GPL570": {
+      "path": "data\\raw\\GPL570\\GPL570.annot.gz",
+      "bytes": 8471521,
+      "sha256": "d7cd44352127b1e34f3a720ebea86093ef255a38f1612a85a2962b71bde8f394",
+      "decompressed_bytes": 39459873
+    }
+  },
+  "GSE42568": {
+    "n_samples": 121,
+    "n_probes": 54675,
+    "platform": [
+      "GPL570"
+    ],
+    "processing": "All microarray data were called using the GC robust multichip average method (GC-RMA). R and Bioconductor - GCRMA package.",
+    "label_counts": {
+      "cancer": 104,
+      "normal": 17
+    },
+    "label_fields_all_agree(tissue,source_name,title,description)": true,
+    "matrix_columns_match_header_order": true,
+    "gsm_range": [
+      "GSM1045191",
+      "GSM1045311"
+    ],
+    "gsm_order_is_class_blocked": "NNNNNNNNNNNNNNNNNTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+    "scale": {
+      "min": 2.3128,
+      "max": 16.0469,
+      "mean": 4.1284,
+      "quantiles_1_5_25_50_75_95_99": [
+        2.3128,
+        2.3128,
+        2.3128,
+        2.8406,
+        5.5289,
+        8.988,
+        11.4279
+      ],
+      "fraction_of_values_equal_to_min": 0.2849,
+      "fraction_below_2": 0.0,
+      "n_negative": 0,
+      "per_sample_median_range": [
+        2.726,
+        3.249
+      ],
+      "n_missing": 0,
+      "n_duplicate_probe_ids": 0,
+      "n_control_probes_AFFX": 62
+    },
+    "duplicate_identical_columns": 0,
+    "max_offdiag_sample_pearson": 0.98751,
+    "floor_probes_all_samples": 96,
+    "floor_probes_ge90pct": 5350,
+    "floor_probes_ge50pct": 18253,
+    "zero_variance_probes": 0,
+    "title_prefix_by_class": {
+      "cancer": {
+        "N": 0,
+        "P": 0,
+        "S": 26,
+        "T": 75
+      },
+      "normal": {
+        "N": 4,
+        "P": 13,
+        "S": 0,
+        "T": 0
+      }
+    },
+    "date_yymm_by_class": {
+      "cancer": {
+        "04-12": 97,
+        "05-01": 4
+      },
+      "normal": {
+        "04-12": 8,
+        "05-01": 9
+      }
+    },
+    "tumour_er_status": {
+      "1": 67,
+      "0": 34,
+      "NA": 3
+    },
+    "tumour_grade": {
+      "3": 53,
+      "2": 40,
+      "1": 11
+    }
+  },
+  "GSE65194": {
+    "n_arrays": 178,
+    "n_probes": 54673,
+    "platform": [
+      "GPL570"
+    ],
+    "processing": "Data were analyzed using standard AffyCDF or Brainarray HGU133Plus2_Hs_ENTREZG version 13 custom chipset definition file. Data were normalized using GC-RMA. Batch and hybridization effects were corrected using a linear model in which they were treated as fixed effects. Samples with technical replicates were subsequently averaged.",
+    "sample_group_counts_arrays": {
+      "TNBC": 55,
+      "Her2": 39,
+      "Luminal B": 30,
+      "Luminal A": 29,
+      "CellLine": 14,
+      "Healthy": 11
+    },
+    "tumour_arrays": 153,
+    "unique_tumours": 130,
+    "tumours_with_two_arrays": 23,
+    "unique_tumours_by_subtype": {
+      "TNBC": 41,
+      "Her2": 30,
+      "Luminal B": 30,
+      "Luminal A": 29
+    },
+    "replicate_pairs_bit_identical": 0,
+    "replicate_pair_pearson_min_median_max": [
+      0.9939,
+      0.9962,
+      0.997
+    ],
+    "cell_lines": [
+      "184B5",
+      "MDA-MB-436",
+      "HCC1143",
+      "HCC1187",
+      "BT20",
+      "HCC1937",
+      "MCF-12A",
+      "HCC38",
+      "Hs 578T",
+      "MDA-MB-468",
+      "BT-549",
+      "HCC70",
+      "MDA-MB-157",
+      "MDA-MB-231"
+    ],
+    "array_batch_by_group": {
+      "B1": {
+        "CellLine": 3,
+        "Healthy": 2,
+        "Her2": 2,
+        "Luminal A": 4,
+        "Luminal B": 6,
+        "TNBC": 3
+      },
+      "B2": {
+        "CellLine": 3,
+        "Healthy": 3,
+        "Her2": 2,
+        "Luminal A": 6,
+        "Luminal B": 7,
+        "TNBC": 3
+      },
+      "B3": {
+        "CellLine": 3,
+        "Healthy": 1,
+        "Her2": 1,
+        "Luminal A": 6,
+        "Luminal B": 7,
+        "TNBC": 2
+      },
+      "B4": {
+        "CellLine": 2,
+        "Healthy": 2,
+        "Her2": 2,
+        "Luminal A": 8,
+        "Luminal B": 4,
+        "TNBC": 3
+      },
+      "B5": {
+        "CellLine": 3,
+        "Healthy": 3,
+        "Her2": 2,
+        "Luminal A": 5,
+        "Luminal B": 6,
+        "TNBC": 3
+      },
+      "B6": {
+        "CellLine": 0,
+        "Healthy": 0,
+        "Her2": 11,
+        "Luminal A": 0,
+        "Luminal B": 0,
+        "TNBC": 11
+      },
+      "B7": {
+        "CellLine": 0,
+        "Healthy": 0,
+        "Her2": 15,
+        "Luminal A": 0,
+        "Luminal B": 0,
+        "TNBC": 25
+      },
+      "B8": {
+        "CellLine": 0,
+        "Healthy": 0,
+        "Her2": 4,
+        "Luminal A": 0,
+        "Luminal B": 0,
+        "TNBC": 5
+      }
+    },
+    "matrix_columns_match_header_order": true,
+    "scale": {
+      "min": -1.2227,
+      "max": 19.9991,
+      "mean": 4.7177,
+      "quantiles_1_5_25_50_75_95_99": [
+        1.7296,
+        1.9598,
+        2.3811,
+        3.2371,
+        6.9216,
+        10.2908,
+        12.5559
+      ],
+      "fraction_of_values_equal_to_min": 0.0,
+      "fraction_below_2": 0.064,
+      "n_negative": 163,
+      "per_sample_median_range": [
+        3.143,
+        3.706
+      ],
+      "n_missing": 0,
+      "n_duplicate_probe_ids": 0,
+      "n_control_probes_AFFX": 62
+    },
+    "duplicate_identical_columns": 0,
+    "would_be_analysis_set": {
+      "cancer_unique_tumours": 130,
+      "normal": 11
+    }
+  },
+  "cross_series": {
+    "shared_gsm": 0,
+    "shared_titles": 0,
+    "probe_ids_shared": 54673,
+    "probes_only_in_GSE42568": [
+      "217199_s_at",
+      "233859_at"
+    ],
+    "probes_only_in_GSE65194": [],
+    "shared_probe_row_order_identical": true,
+    "identical_columns_across_series_4dp": 0
+  },
+  "GPL570": {
+    "records": 54675,
+    "unique_probe_ids": 54675,
+    "annotation_ids_equal_GSE42568_matrix_ids": true,
+    "annotation_date": "Aug 09 2016 (per file header)",
+    "id_column": "ID",
+    "symbol_column": "Gene symbol",
+    "entrez_column": "Gene ID",
+    "empty_symbol": 9557,
+    "multi_gene_probes": 2214,
+    "affx_control": 62,
+    "usable_single_gene_probes": 42894,
+    "usable_fraction": 0.7845,
+    "usable_if_multi_gene_exploded": 45108,
+    "unique_symbols_single_gene": 20848,
+    "genes_1_probe": 9924,
+    "genes_ge2_probes": 10924,
+    "genes_ge5_probes": 1388,
+    "max_probes_per_gene": 20,
+    "fraction_usable_probes_in_multiprobe_genes": 0.7686,
+    "symbols_with_gt1_entrez": 0,
+    "usable_probes_in_both_series": 42892
+  }
+}

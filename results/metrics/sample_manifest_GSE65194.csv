@@ -1,0 +1,179 @@
+gsm,title,label,sample_group,tumour_id,is_replicate_array,array_batch,hybridation batch,include_external,exclusion_reason,collapse_unit
+GSM1588970,"TNBC, TUM001_repA",cancer,TNBC,TUM001,True,B3,H1,True,,TUM001
+GSM1588971,"TNBC, TUM001_repB",cancer,TNBC,TUM001,True,B7,H4,True,,TUM001
+GSM1588972,"Her2, TUM002_repA",cancer,Her2,TUM002,True,B1,H2,True,,TUM002
+GSM1588973,"Her2, TUM002_repB",cancer,Her2,TUM002,True,B7,H4,True,,TUM002
+GSM1588974,"TNBC, TUM003",cancer,TNBC,TUM003,False,B7,H4,True,,TUM003
+GSM1588975,"TNBC, TUM004",cancer,TNBC,TUM004,False,B7,H4,True,,TUM004
+GSM1588976,"TNBC, TUM005",cancer,TNBC,TUM005,False,B6,H4,True,,TUM005
+GSM1588977,"TNBC, TUM006_repA",cancer,TNBC,TUM006,True,B2,H2,True,,TUM006
+GSM1588978,"TNBC, TUM006_repB",cancer,TNBC,TUM006,True,B6,H4,True,,TUM006
+GSM1588979,"TNBC, TUM007",cancer,TNBC,TUM007,False,B7,H4,True,,TUM007
+GSM1588980,"TNBC, TUM008",cancer,TNBC,TUM008,False,B7,H4,True,,TUM008
+GSM1588981,"Her2, TUM009",cancer,Her2,TUM009,False,B6,H4,True,,TUM009
+GSM1588982,"TNBC, TUM010_repA",cancer,TNBC,TUM010,True,B1,H1,True,,TUM010
+GSM1588983,"TNBC, TUM010_repB",cancer,TNBC,TUM010,True,B7,H4,True,,TUM010
+GSM1588984,"TNBC, TUM011",cancer,TNBC,TUM011,False,B8,H4,True,,TUM011
+GSM1588985,"TNBC, TUM012",cancer,TNBC,TUM012,False,B8,H4,True,,TUM012
+GSM1588986,"TNBC, TUM013_repA",cancer,TNBC,TUM013,True,B4,H3,True,,TUM013
+GSM1588987,"TNBC, TUM013_repB",cancer,TNBC,TUM013,True,B6,H4,True,,TUM013
+GSM1588988,"TNBC, TUM014",cancer,TNBC,TUM014,False,B8,H4,True,,TUM014
+GSM1588989,"Her2, TUM015_repA",cancer,Her2,TUM015,True,B4,H2,True,,TUM015
+GSM1588990,"Her2, TUM015_repB",cancer,Her2,TUM015,True,B6,H4,True,,TUM015
+GSM1588991,"Her2, TUM016_repA",cancer,Her2,TUM016,True,B2,H2,True,,TUM016
+GSM1588992,"Her2, TUM016_repB",cancer,Her2,TUM016,True,B7,H4,True,,TUM016
+GSM1588993,"TNBC, TUM017_repA",cancer,TNBC,TUM017,True,B4,H2,True,,TUM017
+GSM1588994,"TNBC, TUM017_repB",cancer,TNBC,TUM017,True,B7,H4,True,,TUM017
+GSM1588995,"TNBC, TUM018_repA",cancer,TNBC,TUM018,True,B4,H1,True,,TUM018
+GSM1588996,"TNBC, TUM018_repB",cancer,TNBC,TUM018,True,B7,H4,True,,TUM018
+GSM1588997,"Her2, TUM019",cancer,Her2,TUM019,False,B7,H4,True,,TUM019
+GSM1588998,"Her2, TUM020_repA",cancer,Her2,TUM020,True,B1,H3,True,,TUM020
+GSM1588999,"Her2, TUM020_repB",cancer,Her2,TUM020,True,B7,H4,True,,TUM020
+GSM1589000,"Her2, TUM021_repA",cancer,Her2,TUM021,True,B4,H1,True,,TUM021
+GSM1589001,"Her2, TUM021_repB",cancer,Her2,TUM021,True,B6,H4,True,,TUM021
+GSM1589002,"Her2, TUM022",cancer,Her2,TUM022,False,B7,H4,True,,TUM022
+GSM1589003,"TNBC, TUM023",cancer,TNBC,TUM023,False,B7,H4,True,,TUM023
+GSM1589004,"TNBC, TUM024",cancer,TNBC,TUM024,False,B6,H4,True,,TUM024
+GSM1589005,"TNBC, TUM025",cancer,TNBC,TUM025,False,B8,H4,True,,TUM025
+GSM1589006,"Her2, TUM026_repA",cancer,Her2,TUM026,True,B5,H3,True,,TUM026
+GSM1589007,"Her2, TUM026_repB",cancer,Her2,TUM026,True,B7,H4,True,,TUM026
+GSM1589008,"Her2, TUM027",cancer,Her2,TUM027,False,B7,H4,True,,TUM027
+GSM1589009,"TNBC, TUM028_repA",cancer,TNBC,TUM028,True,B1,H3,True,,TUM028
+GSM1589010,"TNBC, TUM028_repB",cancer,TNBC,TUM028,True,B6,H4,True,,TUM028
+GSM1589011,"TNBC, TUM029",cancer,TNBC,TUM029,False,B8,H4,True,,TUM029
+GSM1589012,"TNBC, TUM030",cancer,TNBC,TUM030,False,B6,H4,True,,TUM030
+GSM1589013,"Her2, TUM031",cancer,Her2,TUM031,False,B8,H4,True,,TUM031
+GSM1589014,"TNBC, TUM032_repA",cancer,TNBC,TUM032,True,B3,H2,True,,TUM032
+GSM1589015,"TNBC, TUM032_repB",cancer,TNBC,TUM032,True,B6,H4,True,,TUM032
+GSM1589016,"TNBC, TUM033",cancer,TNBC,TUM033,False,B7,H4,True,,TUM033
+GSM1589017,"TNBC, TUM034",cancer,TNBC,TUM034,False,B7,H4,True,,TUM034
+GSM1589018,"Her2, TUM035_repA",cancer,Her2,TUM035,True,B5,H1,True,,TUM035
+GSM1589019,"Her2, TUM035_repB",cancer,Her2,TUM035,True,B6,H4,True,,TUM035
+GSM1589020,"Her2, TUM036",cancer,Her2,TUM036,False,B8,H4,True,,TUM036
+GSM1589021,"Her2, TUM037",cancer,Her2,TUM037,False,B7,H4,True,,TUM037
+GSM1589022,"Her2, TUM038_repA",cancer,Her2,TUM038,True,B3,H1,True,,TUM038
+GSM1589023,"Her2, TUM038_repB",cancer,Her2,TUM038,True,B7,H4,True,,TUM038
+GSM1589024,"TNBC, TUM039",cancer,TNBC,TUM039,False,B7,H4,True,,TUM039
+GSM1589025,"Her2, TUM040",cancer,Her2,TUM040,False,B7,H4,True,,TUM040
+GSM1589026,"Her2, TUM041",cancer,Her2,TUM041,False,B6,H4,True,,TUM041
+GSM1589027,"Her2, TUM042",cancer,Her2,TUM042,False,B6,H4,True,,TUM042
+GSM1589028,"TNBC, TUM043_repA",cancer,TNBC,TUM043,True,B5,H2,True,,TUM043
+GSM1589029,"TNBC, TUM043_repB",cancer,TNBC,TUM043,True,B7,H4,True,,TUM043
+GSM1589030,"Her2, TUM044",cancer,Her2,TUM044,False,B6,H4,True,,TUM044
+GSM1589031,"TNBC, TUM045_repA",cancer,TNBC,TUM045,True,B1,H2,True,,TUM045
+GSM1589032,"TNBC, TUM045_repB",cancer,TNBC,TUM045,True,B6,H4,True,,TUM045
+GSM1589033,"Her2, TUM046",cancer,Her2,TUM046,False,B7,H4,True,,TUM046
+GSM1589034,"Her2, TUM047",cancer,Her2,TUM047,False,B8,H4,True,,TUM047
+GSM1589035,"TNBC, TUM048_repA",cancer,TNBC,TUM048,True,B2,H1,True,,TUM048
+GSM1589036,"TNBC, TUM048_repB",cancer,TNBC,TUM048,True,B7,H4,True,,TUM048
+GSM1589037,"TNBC, TUM049",cancer,TNBC,TUM049,False,B7,H4,True,,TUM049
+GSM1589038,"TNBC, TUM050",cancer,TNBC,TUM050,False,B7,H4,True,,TUM050
+GSM1589039,"TNBC, TUM051_repA",cancer,TNBC,TUM051,True,B2,H3,True,,TUM051
+GSM1589040,"TNBC, TUM051_repB",cancer,TNBC,TUM051,True,B6,H4,True,,TUM051
+GSM1589041,"TNBC, TUM052",cancer,TNBC,TUM052,False,B7,H4,True,,TUM052
+GSM1589042,"TNBC, TUM053",cancer,TNBC,TUM053,False,B7,H4,True,,TUM053
+GSM1589043,"TNBC, TUM054",cancer,TNBC,TUM054,False,B7,H4,True,,TUM054
+GSM1589044,"Her2, TUM055",cancer,Her2,TUM055,False,B6,H4,True,,TUM055
+GSM1589045,"TNBC, TUM056",cancer,TNBC,TUM056,False,B6,H4,True,,TUM056
+GSM1589046,"Her2, TUM057",cancer,Her2,TUM057,False,B6,H4,True,,TUM057
+GSM1589047,"Her2, TUM058_repA",cancer,Her2,TUM058,True,B2,H3,True,,TUM058
+GSM1589048,"Her2, TUM058_repB",cancer,Her2,TUM058,True,B6,H4,True,,TUM058
+GSM1589049,"Her2, TUM059",cancer,Her2,TUM059,False,B6,H4,True,,TUM059
+GSM1589050,"Her2, TUM060",cancer,Her2,TUM060,False,B8,H4,True,,TUM060
+GSM1589051,"Her2, TUM061",cancer,Her2,TUM061,False,B7,H4,True,,TUM061
+GSM1589052,"Her2, TUM062",cancer,Her2,TUM062,False,B7,H4,True,,TUM062
+GSM1589053,"Her2, TUM063",cancer,Her2,TUM063,False,B7,H4,True,,TUM063
+GSM1589054,"TNBC, TUM064_repA",cancer,TNBC,TUM064,True,B5,H3,True,,TUM064
+GSM1589055,"TNBC, TUM064_repB",cancer,TNBC,TUM064,True,B7,H4,True,,TUM064
+GSM1589056,"TNBC, TUM065",cancer,TNBC,TUM065,False,B7,H4,True,,TUM065
+GSM1589057,"Her2, TUM066",cancer,Her2,TUM066,False,B7,H4,True,,TUM066
+GSM1589058,"TNBC, TUM067_repA",cancer,TNBC,TUM067,True,B5,H1,True,,TUM067
+GSM1589059,"TNBC, TUM067_repB",cancer,TNBC,TUM067,True,B7,H4,True,,TUM067
+GSM1589060,"TNBC, TUM068",cancer,TNBC,TUM068,False,B7,H4,True,,TUM068
+GSM1589061,"TNBC, TUM069",cancer,TNBC,TUM069,False,B7,H4,True,,TUM069
+GSM1589062,"TNBC, TUM070",cancer,TNBC,TUM070,False,B6,H4,True,,TUM070
+GSM1589063,"TNBC, TUM071",cancer,TNBC,TUM071,False,B7,H4,True,,TUM071
+GSM1589064,"Luminal A, TUM072",cancer,Luminal A,TUM072,False,B2,H2,True,,TUM072
+GSM1589065,"Luminal A, TUM073",cancer,Luminal A,TUM073,False,B4,H2,True,,TUM073
+GSM1589066,"Luminal A, TUM074",cancer,Luminal A,TUM074,False,B5,H2,True,,TUM074
+GSM1589067,"Luminal A, TUM075",cancer,Luminal A,TUM075,False,B3,H1,True,,TUM075
+GSM1589068,"Luminal A, TUM076",cancer,Luminal A,TUM076,False,B1,H1,True,,TUM076
+GSM1589069,"Luminal A, TUM077",cancer,Luminal A,TUM077,False,B4,H2,True,,TUM077
+GSM1589070,"Luminal A, TUM078",cancer,Luminal A,TUM078,False,B3,H3,True,,TUM078
+GSM1589071,"Luminal A, TUM079",cancer,Luminal A,TUM079,False,B5,H2,True,,TUM079
+GSM1589072,"Luminal A, TUM080",cancer,Luminal A,TUM080,False,B4,H3,True,,TUM080
+GSM1589073,"Luminal A, TUM081",cancer,Luminal A,TUM081,False,B1,H1,True,,TUM081
+GSM1589074,"Luminal A, TUM082",cancer,Luminal A,TUM082,False,B3,H1,True,,TUM082
+GSM1589075,"Luminal A, TUM083",cancer,Luminal A,TUM083,False,B5,H3,True,,TUM083
+GSM1589076,"Luminal A, TUM084",cancer,Luminal A,TUM084,False,B5,H3,True,,TUM084
+GSM1589077,"Luminal A, TUM085",cancer,Luminal A,TUM085,False,B2,H1,True,,TUM085
+GSM1589078,"Luminal A, TUM086",cancer,Luminal A,TUM086,False,B5,H1,True,,TUM086
+GSM1589079,"Luminal A, TUM087",cancer,Luminal A,TUM087,False,B3,H2,True,,TUM087
+GSM1589080,"Luminal A, TUM088",cancer,Luminal A,TUM088,False,B2,H2,True,,TUM088
+GSM1589081,"Luminal A, TUM089",cancer,Luminal A,TUM089,False,B2,H3,True,,TUM089
+GSM1589082,"Luminal A, TUM090",cancer,Luminal A,TUM090,False,B2,H3,True,,TUM090
+GSM1589083,"Luminal A, TUM091",cancer,Luminal A,TUM091,False,B1,H3,True,,TUM091
+GSM1589084,"Luminal A, TUM092",cancer,Luminal A,TUM092,False,B4,H3,True,,TUM092
+GSM1589085,"Luminal A, TUM093",cancer,Luminal A,TUM093,False,B4,H1,True,,TUM093
+GSM1589086,"Luminal A, TUM094",cancer,Luminal A,TUM094,False,B2,H1,True,,TUM094
+GSM1589087,"Luminal A, TUM095",cancer,Luminal A,TUM095,False,B4,H2,True,,TUM095
+GSM1589088,"Luminal A, TUM096",cancer,Luminal A,TUM096,False,B4,H3,True,,TUM096
+GSM1589089,"Luminal A, TUM097",cancer,Luminal A,TUM097,False,B1,H2,True,,TUM097
+GSM1589090,"Luminal A, TUM098",cancer,Luminal A,TUM098,False,B4,H1,True,,TUM098
+GSM1589091,"Luminal A, TUM099",cancer,Luminal A,TUM099,False,B3,H1,True,,TUM099
+GSM1589092,"Luminal A, TUM100",cancer,Luminal A,TUM100,False,B3,H2,True,,TUM100
+GSM1589093,"Luminal B, TUM101",cancer,Luminal B,TUM101,False,B5,H2,True,,TUM101
+GSM1589094,"Luminal B, TUM102",cancer,Luminal B,TUM102,False,B1,H2,True,,TUM102
+GSM1589095,"Luminal B, TUM103",cancer,Luminal B,TUM103,False,B4,H3,True,,TUM103
+GSM1589097,"Luminal B, TUM104",cancer,Luminal B,TUM104,False,B1,H3,True,,TUM104
+GSM1589098,"Luminal B, TUM105",cancer,Luminal B,TUM105,False,B2,H3,True,,TUM105
+GSM1589099,"Luminal B, TUM106",cancer,Luminal B,TUM106,False,B2,H2,True,,TUM106
+GSM1589101,"Luminal B, TUM107",cancer,Luminal B,TUM107,False,B5,H1,True,,TUM107
+GSM1589103,"Luminal B, TUM108",cancer,Luminal B,TUM108,False,B3,H2,True,,TUM108
+GSM1589105,"Luminal B, TUM109",cancer,Luminal B,TUM109,False,B1,H1,True,,TUM109
+GSM1589107,"Luminal B, TUM110",cancer,Luminal B,TUM110,False,B2,H2,True,,TUM110
+GSM1589109,"Luminal B, TUM111",cancer,Luminal B,TUM111,False,B2,H3,True,,TUM111
+GSM1589110,"Luminal B, TUM112",cancer,Luminal B,TUM112,False,B5,H3,True,,TUM112
+GSM1589111,"Luminal B, TUM113",cancer,Luminal B,TUM113,False,B1,H1,True,,TUM113
+GSM1589112,"Luminal B, TUM114",cancer,Luminal B,TUM114,False,B3,H2,True,,TUM114
+GSM1589113,"Luminal B, TUM115",cancer,Luminal B,TUM115,False,B3,H2,True,,TUM115
+GSM1589114,"Luminal B, TUM116",cancer,Luminal B,TUM116,False,B3,H3,True,,TUM116
+GSM1589115,"Luminal B, TUM117",cancer,Luminal B,TUM117,False,B2,H1,True,,TUM117
+GSM1589116,"Luminal B, TUM118",cancer,Luminal B,TUM118,False,B3,H3,True,,TUM118
+GSM1589117,"Luminal B, TUM119",cancer,Luminal B,TUM119,False,B5,H3,True,,TUM119
+GSM1589118,"Luminal B, TUM120",cancer,Luminal B,TUM120,False,B3,H1,True,,TUM120
+GSM1589119,"Luminal B, TUM121",cancer,Luminal B,TUM121,False,B5,H1,True,,TUM121
+GSM1589120,"Luminal B, TUM122",cancer,Luminal B,TUM122,False,B1,H3,True,,TUM122
+GSM1589121,"Luminal B, TUM123",cancer,Luminal B,TUM123,False,B2,H2,True,,TUM123
+GSM1589122,"Luminal B, TUM124",cancer,Luminal B,TUM124,False,B1,H2,True,,TUM124
+GSM1589123,"Luminal B, TUM125",cancer,Luminal B,TUM125,False,B4,H1,True,,TUM125
+GSM1589124,"Luminal B, TUM126",cancer,Luminal B,TUM126,False,B4,H3,True,,TUM126
+GSM1589125,"Luminal B, TUM127",cancer,Luminal B,TUM127,False,B3,H1,True,,TUM127
+GSM1589126,"Luminal B, TUM128",cancer,Luminal B,TUM128,False,B2,H1,True,,TUM128
+GSM1589127,"Luminal B, TUM129",cancer,Luminal B,TUM129,False,B5,H3,True,,TUM129
+GSM1589128,"Luminal B, TUM130",cancer,Luminal B,TUM130,False,B4,H1,True,,TUM130
+GSM1589129,"CellLine, 184B5",cell_line,CellLine,,False,B1,H1,False,cell line (not tissue),GSM1589129
+GSM1589130,"Healthy, H3",normal,Healthy,,False,B1,H2,True,,GSM1589130
+GSM1589131,"CellLine, MDA-MB-436",cell_line,CellLine,,False,B1,H2,False,cell line (not tissue),GSM1589131
+GSM1589132,"Healthy, H13",normal,Healthy,,False,B1,H3,True,,GSM1589132
+GSM1589133,"CellLine, HCC1143",cell_line,CellLine,,False,B1,H3,False,cell line (not tissue),GSM1589133
+GSM1589134,"CellLine, HCC1187",cell_line,CellLine,,False,B2,H1,False,cell line (not tissue),GSM1589134
+GSM1589135,"Healthy, H9",normal,Healthy,,False,B2,H1,True,,GSM1589135
+GSM1589136,"Healthy, H10",normal,Healthy,,False,B2,H2,True,,GSM1589136
+GSM1589137,"CellLine, BT20",cell_line,CellLine,,False,B2,H2,False,cell line (not tissue),GSM1589137
+GSM1589138,"CellLine, HCC1937",cell_line,CellLine,,False,B2,H3,False,cell line (not tissue),GSM1589138
+GSM1589139,"Healthy, H18",normal,Healthy,,False,B2,H3,True,,GSM1589139
+GSM1589140,"CellLine, MCF-12A",cell_line,CellLine,,False,B3,H1,False,cell line (not tissue),GSM1589140
+GSM1589141,"CellLine, HCC38",cell_line,CellLine,,False,B3,H2,False,cell line (not tissue),GSM1589141
+GSM1589142,"Healthy, H12",normal,Healthy,,False,B3,H3,True,,GSM1589142
+GSM1589143,"CellLine, Hs 578T",cell_line,CellLine,,False,B3,H3,False,cell line (not tissue),GSM1589143
+GSM1589144,"Healthy, H11",normal,Healthy,,False,B4,H1,True,,GSM1589144
+GSM1589145,"Healthy, H15",normal,Healthy,,False,B4,H1,True,,GSM1589145
+GSM1589146,"CellLine, MDA-MB-468",cell_line,CellLine,,False,B4,H2,False,cell line (not tissue),GSM1589146
+GSM1589147,"CellLine, BT-549",cell_line,CellLine,,False,B4,H3,False,cell line (not tissue),GSM1589147
+GSM1589148,"Healthy, H4",normal,Healthy,,False,B5,H1,True,,GSM1589148
+GSM1589149,"CellLine, HCC70",cell_line,CellLine,,False,B5,H1,False,cell line (not tissue),GSM1589149
+GSM1589150,"Healthy, H14",normal,Healthy,,False,B5,H2,True,,GSM1589150
+GSM1589151,"Healthy, H5",normal,Healthy,,False,B5,H2,True,,GSM1589151
+GSM1589152,"CellLine, MDA-MB-157",cell_line,CellLine,,False,B5,H2,False,cell line (not tissue),GSM1589152
+GSM1589153,"CellLine, MDA-MB-231",cell_line,CellLine,,False,B5,H3,False,cell line (not tissue),GSM1589153
