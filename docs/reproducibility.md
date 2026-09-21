@@ -32,5 +32,6 @@ Master seed 20260921. Split seed of repeat r = seed + r; model `random_state` = 
 Each result folder contains `manifest.json` (experiment id, git commit and dirty flag, config SHA-256, data hashes, software versions, seeds, resolved model specifications, sample definition, feature universe, runtimes, outputs) and `config.yaml`. The discovery freeze (`docs/freeze/`) additionally records file hashes of the discovery outputs and of the frozen gene table.
 
 ## 6. What is not reproducible bit-for-bit
+- Logistic-regression coefficient/SHAP importance values differ at about 1e-13 when the BLAS thread count differs (e.g. joblib worker vs main process); gene rankings were identical in every checked fold. Bit-identity holds within the same environment.
 - Enrichment libraries are downloaded from Enrichr once and cached with a SHA-256 and download date (`data/external/gene_sets/`, not committed; hashes in `results/enrichment/manifest.json`). Later Enrichr releases may differ.
 - Wall-clock timings depend on the machine and load.
