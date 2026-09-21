@@ -62,7 +62,7 @@ Frozen facts (from reconnaissance; must not be changed silently): GSE42568 = 54,
 
 ## D10. Model set
 - **Decision:** (1) L2-penalised logistic regression (linear), (2) SVM with linear kernel (margin-based), (3) Random Forest (bagged trees), (4) XGBoost (boosted trees). Different inductive biases, not a leaderboard.
-- **Status:** (1) implemented in the pilot slice; (2)-(4) [DEFERRED] Phase 3.
+- **Status:** (1) implemented in the pilot slice; (2)-(4) parameter values pre-specified in D11b (2026-09-22, before any SVM/RF/XGBoost result); implemented and benchmarked in Phase 3.
 - **Alternatives:** elastic-net LR, kernel SVM, kNN, neural networks (not planned).
 
 ## D11. Hyperparameter policy **[DEFERRED]**
@@ -74,13 +74,67 @@ Frozen facts (from reconnaissance; must not be changed silently): GSE42568 = 54,
 - **Decision:** (a) LR coefficients (`|coef|` on z-scored genes; signed value retained); (b) SHAP: TreeSHAP for RF/XGBoost, LinearSHAP for linear models, mean |SHAP| over **training-fold samples**; (c) permutation importance (drop in ROC-AUC). (d) t-test baseline (D16b).
 - **They are not the same quantity:** coefficients are the model's linear weights (conditional effect given other genes); SHAP is an additive attribution of the model output, averaged over samples (reflects model behaviour on the reference distribution, affected by correlated features); permutation importance is the loss increase when one gene is broken (depends on the evaluation data and on correlated genes, which can mask importance). None is causal.
 - **Open compute issue (Phase 4):** exact permutation importance over ~15-20k genes for tree models is expensive. If it is infeasible a principled reduction will be proposed and documented (not silently applied); a candidate reduction must not be chosen using validation-fold or external information.
-- **Note:** LinearSHAP on z-scored features is proportional to |coef| times mean |z|, so LR-coefficient and LR-SHAP rankings are expected to be almost redundant; this will be reported and not treated as independent evidence.
+- **Note (see D12c):** LinearSHAP on z-scored features is proportional to |coef| times mean |z|, so LR-coefficient and LR-SHAP rankings are expected to be almost redundant; this will be reported and not treated as independent evidence.
 - **Outcome timing:** Before.
+
+## D11b. Fixed model configurations and imbalance policy (pre-specified 2026-09-22, before any SVM / RF / XGBoost result)
+All four models use class-balanced training so that none is favoured by the 86% cancer prevalence. No parameter is tuned.
+
+| Model | Configuration | Input scale | Score used for ROC/PR | Predicted label |
+|---|---|---|---|---|
+| Logistic regression (primary C) | L2, `C=1.0`, `class_weight="balanced"`, lbfgs, `max_iter=5000` | z-scored | probability | p >= 0.5 |
+| Linear SVM | `LinearSVC(C=1.0, loss="squared_hinge", penalty="l2", dual=True, class_weight="balanced", max_iter=20000)` | z-scored | decision function (margin) | margin > 0 |
+| Random forest | `RandomForestClassifier(n_estimators=500, max_features="sqrt", min_samples_leaf=1, class_weight="balanced_subsample", n_jobs=4)` | log2 values (scale-invariant) | probability | p >= 0.5 |
+| XGBoost | `XGBClassifier(n_estimators=300, max_depth=3, learning_rate=0.05, subsample=0.8, colsample_bytree=0.5, tree_method="hist", n_jobs=4, scale_pos_weight = n_normal_train / n_cancer_train)` (ratio computed inside the training fold) | log2 values | probability | p >= 0.5 |
+
+`random_state` = master seed (D22). Rationale for these values: library defaults or standard small-data choices (shallow boosted trees, sqrt features), chosen for balance and not for accuracy. Alternatives (kernel SVM, deeper trees, tuning by nested CV) are not planned. The thread count is part of the recorded configuration; determinism is tested run-to-run.
+
+**Metric hierarchy (primary vs supporting):** *primary* = ROC-AUC (threshold-free; independent of prevalence) and normal-class average precision `ap_normal` (the informative PR-AUC when the minority class is the one that matters); *supporting* = balanced accuracy, sensitivity (cancer recall), specificity (normal recall), F1 per class and confusion counts (these depend on the fixed decision threshold). Plain accuracy is not a headline metric. Near-ceiling AUC is an observation about this cohort (tumour vs normal is easily separable), not a success criterion, and does not influence any decision below.
+
+## D11c. Regularisation-strength sensitivity for logistic regression (pre-specified 2026-09-22, before any sensitivity result)
+- **Question:** is the low stability of coefficient rankings seen in the pilot (Nogueira 0.28-0.32) sensitive to reasonable regularisation choices? This is a robustness check, **not** hyper-parameter optimisation, and the primary configuration stays `C=1` whatever the outcome.
+- **Grid (fixed now):** C in {0.01, 0.1, 1, 10, 100} (five decades; 1 is the primary/default). L2, balanced weights, same preprocessing.
+- **Design:** GSE42568 only; 5 repeats x 5 folds (25 feature sets per C), seed 20260921, identical splits for every C.
+- **Reported per C:** Nogueira / Kuncheva / Jaccard at k = 10, 25, 50; pooled out-of-fold ROC-AUC, `ap_normal` and balanced accuracy with bootstrap CIs; **rank agreement with C=1**: mean over folds of the Spearman correlation of |coef| over all eligible genes, and mean over folds of the Jaccard overlap of the top-25 sets.
+- **Pre-specified qualitative criterion:** the band of Phi at k=25 in the paper's own scale (Nogueira et al. 2018, Table 3: < 0.40 poor, 0.40-0.75 intermediate to good, > 0.75 excellent), and the statement "pooled ROC-AUC >= 0.98". Conclusions are called **robust** if every C stays in the same Phi band as C=1 and AUC stays >= 0.98, and **materially changed** otherwise. If they change, the paper reports Phi as a function of C (a finding) and investigates the mechanism; the primary C is not re-chosen.
+- **Not used:** GSE65194.
+
+## D12b. Permutation-importance strategy (decided 2026-09-22 after a feasibility benchmark; implementation in Phase 4)
+**Problem.** About 20,000 genes per fold. Exact permutation importance (PI) for every gene, every fold and every model is expensive for tree ensembles. Benchmark on one real training fold (`scripts/benchmark_pi_feasibility.py`; 96 training samples, 20,087 genes, R = 10 permutations): RF re-prediction 111 ms, so naive exact PI over all genes would take about 22,000 s per fold; XGBoost 46 ms, about 9,000 s per fold. The same benchmark shows that the fitted models are **sparse**: the forest uses 1,247 of 20,087 genes (6.2%) and XGBoost only 24, whereas the linear models are dense (all 20,087 coefficients non-zero).
+
+**Options evaluated.**
+
+| Option | Scientific validity | Leakage risk | Cost | Interpretability / comparability | Effect on the research question |
+|---|---|---|---|---|---|
+| **A** exact PI over all genes, naive | exact | none if computed on training data | prohibitive for RF/XGB (hours per fold) | ideal | none |
+| **B** staged: cheap filter (e.g. t-test top N), PI only on survivors | approximate; depends on the filter | none if fold-internal | low | **poor**: gives PI a different candidate universe from coefficients/SHAP and imports the t-test ranking into one explainer, which biases the explainer-agreement and stability comparisons and contaminates the t-test baseline comparison | distorts the central comparison |
+| **C** exact PI with **exactness-preserving** shortcuts | exact (identical to A up to floating point) | none | seconds per fold | same universe and definition as A | none |
+| **D** replace PI by another importance (e.g. impurity importance) | changes the explainer | none | low | different quantity, known biases (Strobl et al.) | changes what is compared |
+
+**Recommendation: Option C.** Each shortcut is exact and will be verified against a brute-force reference in tests:
+1. **Linear models (LR, SVM):** permuting gene j changes the score only through coef_j x (permuted - original x_j), so the loss for all 20k genes is computed analytically and vectorised.
+2. **Tree ensembles:** a gene never used in any split has exactly zero PI, so PI is computed only for genes the fitted model uses (model structure is a property of the training fold; no external information).
+3. **RF only:** permuting gene j changes only the trees that split on j, so only those trees are re-evaluated.
+
+No gene is dropped "because it is probably unimportant", and there is no arbitrary top-N. This is Option A's result, computed efficiently.
+
+**Definition (fixed now).**
+- Evaluation data = **the training fold** (the model's reliance on each gene on the data it was fitted to). Rationale: it keeps every explainer computed from training-fold information only (the same guarantee the leakage tests enforce), matches the SHAP choice (D12c), and avoids a 24-sample validation fold with 3-4 normals on which almost every gene would have zero or noisy importance. Limitation (documented): for models that fit the training data perfectly, training-fold PI describes reliance and not generalisation value. A **held-out-fold PI** is a pre-specified, exploratory sensitivity variant.
+- Loss = **class-balanced Brier score**, `L = 0.5 * [mean_{y=1}(1-p)^2 + mean_{y=0} p^2]`, with p the predicted probability (RF, XGB, LR) or `sigmoid(margin)` for the SVM. Rationale: ROC-AUC would be 1.0 on training data for every gene (no signal); log-loss is unbounded for saturated forest probabilities; class balancing stops the 86% majority class dominating. Importance_j = mean over R permutations of L(permuted j) - L(original). The SVM margin scale is arbitrary, so PI magnitudes are not comparable across models; only rankings are compared.
+- R = 10 permutations of the training rows; the same R permutation vectors are applied to every gene within a fold (each (gene, r) is a uniform random permutation of that gene). Permutation seed derived from the master seed, repeat and fold (D22).
+- **Known limitations (reported, not hidden):** PI is diluted by correlated genes (co-expressed modules can mask each other). Zuo et al. 2026 reported near-zero stability for permutation importance on transcriptomic neural networks (as summarised in the literature record; not re-read in full), so low PI stability here may reflect the method's correlation sensitivity and not a pipeline defect. Magnitudes are not comparable to coefficients or SHAP values.
+- **Uncertainty flagged for the user:** training-fold evaluation is a judgement call; the alternative (held-out fold) is a legitimate reading of "permutation importance". Switching would affect only the PI explainer, would be reported as a sensitivity analysis, and does not alter the research question.
+
+## D12c. SHAP plan (details fixed now; benchmarks in Phase 4)
+Explainer per model: `LinearExplainer` (interventional, training-fold background) for LR and the linear SVM; `TreeExplainer` for RF and XGBoost (model output = probability for RF, log-odds for XGBoost). Importance = mean |SHAP| over **training-fold samples**; signed value = mean SHAP. For standardised features, LinearSHAP of a linear model is proportional to coef_j times the feature's mean absolute deviation, so linear-model SHAP and coefficient rankings are expected to be almost redundant; this will be reported as such and not counted as independent evidence. SHAP is one explainer among three; the research question is explanation consistency, not SHAP. The returned dimensions, reproducibility and a known-answer toy test are prerequisites before any full SHAP run.
 
 ## D13. Top-k definitions
 - **Decision:** k in {10, 25, 50} genes, taken by rank (rank 1 = largest importance; ties broken by gene symbol). The top-200 of every run is stored with rank and importance; k=25 is the pre-specified headline value, 10 and 50 are reported alongside.
 - **Rationale:** Small enough to be a "signature", large enough for overlap statistics. k is not tuned on any outcome.
 - **Outcome timing:** Before.
+
+## D13b. Zero-attribution rule for top-k selection (pre-specified 2026-09-22, before any tree-model result)
+Sparse models (XGBoost uses about 24 genes and RF about 6% of genes in the benchmark fold) have exactly zero attribution for most genes. Ranking those by gene name would fill the top-k with arbitrary but **identical-across-folds** alphabetical genes and manufacture spurious stability. Therefore a gene is **eligible for a top-k set only if its importance is strictly positive**; the top-k set is the k highest, or all positive genes if fewer than k. Set sizes can therefore be smaller than k for sparse models. Nogueira's Phi supports variable set sizes; Kuncheva's index requires equal sizes and is reported only when sizes are constant. The number of positive-attribution genes per run is recorded. Logistic-regression and SVM coefficients are dense, so nothing changes for the pilot.
 
 ## D14. Stability metrics
 - **Decision:** Primary: **Nogueira Phi** (Nogueira, Sechidis & Brown, JMLR 18(174), 2018, Def. 4, Eq. 2). Secondary: mean pairwise **Kuncheva** consistency index (Kuncheva 2007) and mean pairwise **Jaccard**. Definitions were checked against the JMLR paper text (Definition 4, Theorem 5, Appendix A Table 6) and the stabm documentation examples (Jaccard 0.7166667, Nogueira 0.7222222 for sets {1:3,1:4,1:5}, p=10).
