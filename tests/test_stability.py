@@ -1,5 +1,8 @@
 """Stability metrics validated against toy cases, hand calculation, published reference values and theory."""
 import itertools
+import os
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -86,6 +89,29 @@ def test_dependence_on_k_for_fixed_relative_overlap():
 def test_edge_cases_raise(call):
     with pytest.raises(ValueError):
         call()
+
+
+SCRIPT = """
+import random
+from bioxplain.stability.metrics import nogueira_stability
+rnd = random.Random(7)
+pool = rnd.sample([f'GENE{i}' for i in range(20848)], 60)
+sets = [set(rnd.sample(pool, 25)) for _ in range(10)]
+print(repr(nogueira_stability(sets, 20848)))
+"""
+
+
+def test_result_is_bit_identical_across_python_hash_seeds():
+    """Regression for a real bug found on GSE42568 results: a plain sum() over a Counter of a frozenset union
+    of string features changed in the last bits between runs, because string-hash randomisation changes the
+    iteration order and float addition is not associative. With the old implementation this scenario gave 4
+    different values over 8 PYTHONHASHSEEDs; math.fsum makes it exactly reproducible."""
+    outputs = set()
+    for seed in range(8):
+        env = {**os.environ, "PYTHONHASHSEED": str(seed)}
+        res = subprocess.run([sys.executable, "-c", SCRIPT], env=env, capture_output=True, text=True, check=True)
+        outputs.add(res.stdout.strip())
+    assert len(outputs) == 1, outputs
 
 
 def test_order_of_sets_does_not_matter():

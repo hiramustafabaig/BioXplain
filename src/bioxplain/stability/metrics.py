@@ -18,6 +18,7 @@ and is NOT valid for overlapping cross-validation training sets; none is provide
 from __future__ import annotations
 
 import itertools
+import math
 from collections import Counter
 from collections.abc import Collection, Hashable, Sequence
 
@@ -48,8 +49,10 @@ def nogueira_stability(sets: Sequence[FeatureSet], n_features: int) -> float:
     if kbar <= 0 or kbar >= d:
         raise ValueError("Phi is undefined when the mean set size is 0 or equals the number of features")
     counts = Counter(itertools.chain.from_iterable(fsets))
-    # features never selected have p_f = 0 and contribute 0 to the sum of variances
-    sum_var = sum((m / (m - 1)) * (c / m) * (1 - c / m) for c in counts.values())
+    # features never selected have p_f = 0 and contribute 0 to the sum of variances.
+    # math.fsum is exactly rounded, so the result does not depend on set/dict iteration order
+    # (which varies with string-hash randomisation); a plain sum() differed in the last bits between runs.
+    sum_var = math.fsum((m / (m - 1)) * (c / m) * (1 - c / m) for c in counts.values())
     return 1.0 - (sum_var / d) / ((kbar / d) * (1 - kbar / d))
 
 
