@@ -16,6 +16,7 @@ import yaml
 from bioxplain.data.discovery import load_discovery
 from bioxplain.evaluation.bootstrap import bootstrap_intervals
 from bioxplain.evaluation.metrics import classification_metrics
+from bioxplain.models.factory import resolve_spec
 from bioxplain.stability.summary import stability_summary
 from bioxplain.utils.provenance import config_hash, git_state, software_versions, utc_now
 from bioxplain.validation.cv import run_fold
@@ -65,7 +66,7 @@ def run_experiment(config_path: str | pathlib.Path, root: str | pathlib.Path, ou
     y = data.y.to_numpy()
     d_universe = int(data.probe_to_gene.nunique())
 
-    model_spec, explainer = cfg["model"], cfg["explainer"]
+    model_spec, explainer = resolve_spec(cfg["model"]), cfg["explainer"]
     ranking_frames, pred_frames, run_rows, eligible = [], [], [], set()
     t = time.perf_counter()
     for sp in repeated_stratified_splits(y, cfg["cv"]["n_splits"], cfg["cv"]["n_repeats"], cfg["seed"]):
@@ -103,6 +104,7 @@ def run_experiment(config_path: str | pathlib.Path, root: str | pathlib.Path, ou
         "data": json.loads((root / "configs/data_manifest.json").read_text())["files"]["GSE42568"],
         "feature_universe": {"n_probes": int(len(data.probe_to_gene)), "n_genes": d_universe,
                              "n_genes_eligible_in_any_fold": len(eligible)},
+        "model_resolved": model_spec, "explainer": explainer,
         "n_samples": int(len(y)), "n_cancer": int(y.sum()), "n_normal": int((y == 0).sum()),
         "timings_seconds": {k: round(v, 3) for k, v in timings.items()},
         "outputs": sorted(p.name for p in out.iterdir()) + ["manifest.json"],

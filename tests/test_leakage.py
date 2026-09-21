@@ -40,6 +40,13 @@ def _first_split(y):
     return next(iter(repeated_stratified_splits(y, 5, 1, seed=11)))
 
 
+TIMING_KEYS = {"prep_seconds", "fit_seconds"}      # wall-clock fields legitimately differ between calls
+
+
+def _stable(diagnostics):
+    return {k: v for k, v in diagnostics.items() if k not in TIMING_KEYS}
+
+
 def _learned_artifacts(out):
     return out.ranking[["gene", "probe", "importance", "signed", "rank"]].reset_index(drop=True), out.diagnostics
 
@@ -80,7 +87,7 @@ def test_learned_artifacts_are_invariant_to_validation_fold_contents(cohort):
     r0, d0 = _learned_artifacts(base)
     r1, d1 = _learned_artifacts(pert)
     pd.testing.assert_frame_equal(r0, r1, check_exact=True)
-    assert d0 == d1
+    assert _stable(d0) == _stable(d1)
     assert list(base.eligible_genes) == list(pert.eligible_genes)
     assert not np.allclose(base.predictions["score"], pert.predictions["score"])   # the corruption did reach predictions
 
@@ -154,3 +161,18 @@ def test_our_pipeline_is_at_chance_when_labels_are_random(cohort):
         scores[sp.test_idx] = out.predictions["score"].to_numpy()
     assert not np.isnan(scores).any()
     assert 0.25 < roc_auc_score(y, scores) < 0.75
+
+
+@pytest.mark.parametrize("name,explainer", [("logreg", "coef"), ("svm", "coef"), ("rf", None), ("xgb", None)])
+def test_every_model_is_invariant_to_validation_fold_contents(cohort, name, explainer):
+    """The leakage contract holds for all four models: corrupting the validation rows changes nothing that was learned."""
+    X, y, m, _ = cohort
+    sp = _first_split(y)
+    kw = dict(model_spec={"name": name}, explainer_name=explainer, probe_to_gene=m, prep_cfg={"min_detect_frac_of_minority": 0.5, "collapse_rule": "max_mean"}, seed=11, store_top=40)
+    base = cv.run_fold(X, y, sp.train_idx, sp.test_idx, **kw)
+    pert = cv.run_fold(_corrupt(X, sp.test_idx), y, sp.train_idx, sp.test_idx, **kw)
+    assert base.support_genes == pert.support_genes
+    assert _stable(base.diagnostics) == _stable(pert.diagnostics)
+    assert list(base.eligible_genes) == list(pert.eligible_genes)
+    pd.testing.assert_frame_equal(base.ranking.reset_index(drop=True), pert.ranking.reset_index(drop=True), check_exact=True)
+    assert not np.allclose(base.predictions["score"], pert.predictions["score"])     # the corruption did reach predictions
