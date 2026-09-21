@@ -12,10 +12,10 @@ import time
 import numpy as np
 import pandas as pd
 import yaml
-from sklearn.metrics import average_precision_score, balanced_accuracy_score, roc_auc_score
 
 from bioxplain.data.discovery import load_discovery
-from bioxplain.evaluation.metrics import bootstrap_ci, classification_metrics
+from bioxplain.evaluation.bootstrap import bootstrap_intervals
+from bioxplain.evaluation.metrics import classification_metrics
 from bioxplain.stability.summary import stability_summary
 from bioxplain.utils.provenance import config_hash, git_state, software_versions, utc_now
 from bioxplain.validation.cv import run_fold
@@ -41,15 +41,9 @@ def _pooled_metrics(pred: pd.DataFrame, n_boot: int, seed: int) -> pd.DataFrame:
     for rep, g in pred.groupby("repeat"):
         y, s, p = g["y_true"].to_numpy(), g["score"].to_numpy(), g["pred"].to_numpy()
         assert g["sample"].is_unique, "each sample must be predicted exactly once per repeat"
-        m = classification_metrics(y, s, p)
-        cis = {
-            "roc_auc": bootstrap_ci(y, s, roc_auc_score, n_boot, seed),
-            "ap_normal": bootstrap_ci(y, s, lambda a, b: average_precision_score(1 - a, 1 - b), n_boot, seed),
-            "balanced_accuracy": bootstrap_ci(y, s, lambda a, b: balanced_accuracy_score(a, (b >= 0.5).astype(int)), n_boot, seed),
-        }
-        row = {"repeat": rep, "n": len(g), **m}
-        for k, (lo, hi) in cis.items():
-            row[f"{k}_ci_lo"], row[f"{k}_ci_hi"] = lo, hi
+        row = {"repeat": rep, "n": len(g), **classification_metrics(y, s, p)}
+        for name, (lo, hi) in bootstrap_intervals(y, s, p, n_boot, seed).items():   # vectorised, see evaluation/bootstrap.py
+            row[f"{name}_ci_lo"], row[f"{name}_ci_hi"] = lo, hi
         rows.append(row)
     return pd.DataFrame(rows)
 
