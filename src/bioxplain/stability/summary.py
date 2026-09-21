@@ -7,11 +7,20 @@ from bioxplain.stability.metrics import jaccard_stability, kuncheva_index, nogue
 
 
 def top_k_sets(rankings: pd.DataFrame, k: int, run_cols=("repeat", "fold")) -> list[frozenset]:
-    """One frozenset of the top-k genes per run, in deterministic run order."""
-    if rankings.groupby(list(run_cols))["rank"].max().min() < k:
-        raise ValueError(f"stored rankings hold fewer than k={k} genes for some run; increase store_top")
-    top = rankings[rankings["rank"] <= k]
-    return [frozenset(g["gene"]) for _, g in sorted(top.groupby(list(run_cols)), key=lambda kv: kv[0])]
+    """One frozenset per run: the k highest-ranked genes among those with strictly positive importance (D13b).
+
+    Runs are returned in deterministic order. A run with fewer than k positive-attribution genes (sparse models)
+    yields a smaller set; zero-importance genes are never used as fillers. ``rankings`` must contain ``importance``.
+    """
+    if "importance" not in rankings.columns:
+        raise ValueError("rankings need an 'importance' column to apply the zero-attribution rule")
+    top = rankings[(rankings["rank"] <= k) & (rankings["importance"] > 0)]
+    keys = sorted(rankings.groupby(list(run_cols)).groups.keys())
+    groups = {key: frozenset(g["gene"]) for key, g in top.groupby(list(run_cols))}
+    sets = [groups.get(key, frozenset()) for key in keys]
+    if any(len(x) == 0 for x in sets):
+        raise ValueError("a run has no positive-attribution gene; stability is undefined")
+    return sets
 
 
 def stability_summary(
@@ -32,9 +41,10 @@ def stability_summary(
             sets = top_k_sets(sub, k, run_cols)
             row = {"scope": scope, "k": k, "n_sets": len(sets), "n_features": n_features,
                    "nogueira": nogueira_stability(sets, n_features),
-                   "kuncheva": kuncheva_index(sets, n_features),
+                   "kuncheva": kuncheva_index(sets, n_features) if len({len(x) for x in sets}) == 1 else float("nan"),
                    "jaccard": jaccard_stability(sets),
-                   "n_distinct_genes": len(frozenset().union(*sets))}
+                   "n_distinct_genes": len(frozenset().union(*sets)),
+                   "mean_set_size": sum(len(x) for x in sets) / len(sets)}
             if n_features_alt:
                 row["nogueira_alt_universe"] = nogueira_stability(sets, n_features_alt)
                 row["n_features_alt"] = n_features_alt

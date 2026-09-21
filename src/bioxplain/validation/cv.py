@@ -38,7 +38,7 @@ def run_fold(
     probe_to_gene: pd.Series,
     prep_cfg: dict,
     seed: int,
-    store_top: int = 200,
+    store_top: int | None = 200,
 ) -> FoldOutput:
     y = np.asarray(y).astype(int)
     train_idx, test_idx = np.asarray(train_idx), np.asarray(test_idx)
@@ -61,7 +61,10 @@ def run_fold(
     pred = model.predict(Z_test.to_numpy())
     metrics = classification_metrics(y[test_idx], score, pred)
 
-    ranking = attribution.head(store_top).copy()
+    # D13b: only genes with strictly positive attribution are eligible for top-k sets (sparse models have exact zeros;
+    # ranking those by gene name would manufacture identical, arbitrary 'selected' genes in every fold)
+    positive = attribution[attribution["importance"] > 0]
+    ranking = (positive if store_top is None else positive.head(store_top)).copy()
     ranking["probe"] = prep.collapser_.selected_.loc[ranking["gene"]].to_numpy()
     if prep.filter_.floor_ is not None:   # how many TRAINING samples detect the chosen probe (artefact check, D8)
         raw = X_train.loc[:, ranking["probe"].to_numpy()].to_numpy()
@@ -73,5 +76,6 @@ def run_fold(
         {"sample": X.index[test_idx], "y_true": y[test_idx], "score": score, "pred": pred.astype(int)}
     )
     diagnostics = {**prep.diagnostics(), "n_train": len(train_idx), "n_test": len(test_idx),
-                   "n_train_normal": int((y_train == 0).sum()), "n_test_normal": int((y[test_idx] == 0).sum())}
+                   "n_train_normal": int((y_train == 0).sum()), "n_test_normal": int((y[test_idx] == 0).sum()),
+                   "n_positive_attribution": int(len(positive))}
     return FoldOutput(ranking, predictions, metrics, diagnostics, prep.genes_)

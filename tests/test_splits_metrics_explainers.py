@@ -113,16 +113,42 @@ def test_default_logistic_penalty_is_l2():
     assert (m.fit(X, y).coef_ == 0).sum() == 0
 
 
-def test_top_k_sets_and_summary():
+def _rank_frame(n_runs_rep=2, n_folds=3, genes=("g1", "g2", "g3", "g4", "g5"), importances=None):
     rows = []
-    for rep in range(2):
-        for fold in range(3):
-            for r in range(1, 6):
-                rows.append({"repeat": rep, "fold": fold, "rank": r, "gene": f"g{r}"})   # identical rankings
-    rk = pd.DataFrame(rows)
+    for rep in range(n_runs_rep):
+        for fold in range(n_folds):
+            for r, g in enumerate(genes, start=1):
+                imp = (importances or {}).get(g, 1.0 / r)
+                rows.append({"repeat": rep, "fold": fold, "rank": r, "gene": g, "importance": imp})
+    return pd.DataFrame(rows)
+
+
+def test_top_k_sets_and_summary():
+    rk = _rank_frame()                                                   # identical rankings in every run
     assert all(s == {"g1", "g2"} for s in top_k_sets(rk, 2))
     s = stability_summary(rk, [2, 3], n_features=50, n_features_alt=20)
     assert s.loc[s.scope == "all_runs", "nogueira"].tolist() == [pytest.approx(1.0)] * 2
     assert set(s.scope) == {"all_runs", "repeat_0", "repeat_1"} and (s.n_features_alt == 20).all()
-    with pytest.raises(ValueError, match="store_top"):
-        top_k_sets(rk, 10)
+
+
+def test_zero_attribution_genes_are_never_used_as_fillers():
+    """D13b: with only 3 positive genes, top-5 has size 3; the zero-importance genes (alphabetical fillers) stay out."""
+    rk = _rank_frame(importances={"g1": 3.0, "g2": 2.0, "g3": 1.0, "g4": 0.0, "g5": 0.0})
+    sets = top_k_sets(rk, 5)
+    assert all(s == {"g1", "g2", "g3"} for s in sets)
+    assert top_k_sets(rk, 2)[0] == {"g1", "g2"}
+
+
+def test_variable_size_sets_give_nogueira_but_no_kuncheva():
+    rk = _rank_frame(n_runs_rep=1, n_folds=2, importances={"g1": 3.0, "g2": 2.0, "g3": 1.0, "g4": 0.0, "g5": 0.0})
+    rk.loc[(rk.fold == 1) & (rk.gene == "g3"), "importance"] = 0.0        # fold 1 has only 2 positive genes
+    s = stability_summary(rk, [5], n_features=100)
+    row = s[s.scope == "all_runs"].iloc[0]
+    assert np.isnan(row.kuncheva) and 0 < row.nogueira < 1 and row.mean_set_size == 2.5
+
+
+def test_stability_requires_importance_column_and_nonempty_runs():
+    with pytest.raises(ValueError, match="importance"):
+        top_k_sets(_rank_frame().drop(columns="importance"), 3)
+    with pytest.raises(ValueError, match="no positive"):
+        top_k_sets(_rank_frame(importances={g: 0.0 for g in ("g1", "g2", "g3", "g4", "g5")}), 3)
