@@ -1,0 +1,23 @@
+bootstrap:
+  n_boot: 2000
+cv:
+  n_repeats: 2
+  n_splits: 5
+dataset: GSE42568
+explainer: coef
+model:
+  C: 1.0
+  class_weight: balanced
+  max_iter: 5000
+  name: logreg
+name: slice_logreg_coef
+preprocessing:
+  collapse_rule: max_mean
+  min_detect_frac_of_minority: 0.5
+  scale: true
+seed: 20260921
+store_top: 200
+top_k:
+- 10
+- 25
+- 50

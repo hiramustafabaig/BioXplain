@@ -1,0 +1,53 @@
+{
+  "experiment_id": "20260921T190737Z_slice_logreg_coef_1cb7b8e9",
+  "started_utc": "2026-09-21T19:07:37.643490+00:00",
+  "config_sha256": "1cb7b8e9e97ac721b5cfb114748737fc7f41508e8dbcf3ded930135093d84f99",
+  "config_path": "configs\\slice_logreg_coef.yaml",
+  "git": {
+    "commit": "192f1a7fdba17bda7ec13ca76b5c821c0e9a8ff8",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "data": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE42nnn/GSE42568/matrix/GSE42568_series_matrix.txt.gz",
+    "path": "data/raw/GSE42568/GSE42568_series_matrix.txt.gz",
+    "bytes": 22565943,
+    "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+    "decompressed_bytes": 79859027
+  },
+  "feature_universe": {
+    "n_probes": 42892,
+    "n_genes": 20848,
+    "n_genes_eligible_in_any_fold": 20335
+  },
+  "n_samples": 121,
+  "n_cancer": 104,
+  "n_normal": 17,
+  "timings_seconds": {
+    "load_data_s": 3.932,
+    "cv_loop_s": 13.315,
+    "metrics_and_stability_s": 40.264,
+    "total_s": 57.619
+  },
+  "outputs": [
+    "config.yaml",
+    "pooled_metrics.csv",
+    "predictions.csv",
+    "rankings_top.csv.gz",
+    "runs.csv",
+    "stability.csv",
+    "manifest.json"
+  ]
+}
