@@ -1,0 +1,44 @@
+{
+  "verdict": "materially_changed",
+  "reference_C": 1.0,
+  "reference_band": "poor",
+  "auc_floor": 0.98,
+  "per_C": {
+    "0.01": {
+      "phi_k25": 0.48057713105700417,
+      "band": "intermediate_to_good",
+      "min_pooled_auc": 0.9920814479638008,
+      "same_band_as_reference": false,
+      "auc_ok": true
+    },
+    "0.1": {
+      "phi_k25": 0.430917581520434,
+      "band": "intermediate_to_good",
+      "min_pooled_auc": 0.9903846153846153,
+      "same_band_as_reference": false,
+      "auc_ok": true
+    },
+    "1.0": {
+      "phi_k25": 0.2480316060766139,
+      "band": "poor",
+      "min_pooled_auc": 0.9937782805429864,
+      "same_band_as_reference": true,
+      "auc_ok": true
+    },
+    "10.0": {
+      "phi_k25": 0.4768393155004882,
+      "band": "intermediate_to_good",
+      "min_pooled_auc": 0.9949095022624433,
+      "same_band_as_reference": false,
+      "auc_ok": true
+    },
+    "100.0": {
+      "phi_k25": 0.4763053418495573,
+      "band": "intermediate_to_good",
+      "min_pooled_auc": 0.9949095022624433,
+      "same_band_as_reference": false,
+      "auc_ok": true
+    }
+  },
+  "criterion_k": 25
+}

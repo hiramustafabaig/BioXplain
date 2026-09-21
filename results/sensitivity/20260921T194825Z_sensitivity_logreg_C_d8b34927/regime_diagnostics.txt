@@ -1,0 +1,24 @@
+== solver / coefficient regime (mean over 6 training folds; L2 logistic regression, balanced, max_iter=5000)
+        n_iter  warnings  coef_norm  min_train_margin  top25_over_median  rho_vs_mean_difference
+C                                                                                               
+0.01    36.667         0      0.123             3.699              5.015                   0.754
+0.10    38.333         0      0.168             5.364              5.216                   0.682
+1.00    41.000         0      0.257             6.811              4.818                   0.499
+10.00   15.500         0      0.849             7.214              5.579                   0.566
+100.00  15.000         0      0.868             7.446              5.597                   0.557
+
+== mean Spearman correlation of |coef| between C settings (same training data)
+        0.01    0.10    1.00    10.00   100.00
+0.01      1.00    0.98    0.70    0.65    0.64
+0.10      0.98    1.00    0.71    0.67    0.66
+1.00      0.70    0.71    1.00    0.63    0.63
+10.00     0.65    0.67    0.63    1.00    1.00
+100.00    0.64    0.66    0.63    1.00    1.00
+
+== mean top-25 Jaccard between C settings
+        0.01    0.10    1.00    10.00   100.00
+0.01      1.00    0.68    0.31    0.11    0.11
+0.10      0.68    1.00    0.31    0.10    0.09
+1.00      0.31    0.31    1.00    0.16    0.16
+10.00     0.11    0.10    0.16    1.00    0.92
+100.00    0.11    0.09    0.16    0.92    1.00

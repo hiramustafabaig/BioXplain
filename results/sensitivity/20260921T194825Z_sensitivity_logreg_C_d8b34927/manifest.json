@@ -1,0 +1,51 @@
+{
+  "sensitivity_id": "20260921T194825Z_sensitivity_logreg_C_d8b34927",
+  "started_utc": "2026-09-21T19:48:25.239266+00:00",
+  "config_sha256": "d8b34927d33424ae7e9dcf31e03fb3454fc4292348fc63bbd4045cb18f81c128",
+  "git": {
+    "commit": "6863ab132da35860a497cfb75cca68f09c358b4e",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "n_samples": 121,
+  "n_normal": 17,
+  "data": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE42nnn/GSE42568/matrix/GSE42568_series_matrix.txt.gz",
+    "path": "data/raw/GSE42568/GSE42568_series_matrix.txt.gz",
+    "bytes": 22565943,
+    "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+    "decompressed_bytes": 79859027
+  },
+  "feature_universe": {
+    "n_genes": 20848
+  },
+  "n_splits_total": 25,
+  "grid_C": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "runtime_seconds": 100.36,
+  "outputs": [
+    "config.yaml",
+    "pooled_metrics_by_C.csv",
+    "rank_agreement.csv",
+    "stability_by_C.csv",
+    "verdict.json",
+    "manifest.json"
+  ]
+}

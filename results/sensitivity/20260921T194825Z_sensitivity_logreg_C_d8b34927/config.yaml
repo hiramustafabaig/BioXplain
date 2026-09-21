@@ -1,0 +1,33 @@
+bootstrap:
+  n_boot: 2000
+criterion:
+  k: 25
+  robust_auc_min: 0.98
+cv:
+  n_repeats: 5
+  n_splits: 5
+dataset: GSE42568
+explainer: coef
+grid:
+  C:
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  - 100.0
+  reference_C: 1.0
+model:
+  class_weight: balanced
+  max_iter: 5000
+  name: logreg
+name: sensitivity_logreg_C
+preprocessing:
+  collapse_rule: max_mean
+  min_detect_frac_of_minority: 0.5
+  scale: true
+seed: 20260921
+store_top: 200
+top_k:
+- 10
+- 25
+- 50
