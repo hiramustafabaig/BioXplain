@@ -1,0 +1,27 @@
+# Pre-specified in docs/methodology_decisions.md D11c BEFORE any sensitivity result. Discovery cohort only.
+# Robustness check of coefficient-ranking stability against L2 regularisation strength; the primary C stays 1.0.
+name: sensitivity_logreg_C
+dataset: GSE42568
+seed: 20260921
+cv:
+  n_splits: 5
+  n_repeats: 5
+preprocessing:
+  min_detect_frac_of_minority: 0.5
+  collapse_rule: max_mean
+  scale: true
+model:
+  name: logreg          # C is set from grid.C
+  class_weight: balanced
+  max_iter: 5000
+grid:
+  C: [0.01, 0.1, 1.0, 10.0, 100.0]
+  reference_C: 1.0
+explainer: coef
+top_k: [10, 25, 50]
+store_top: 200
+bootstrap:
+  n_boot: 2000
+criterion:                 # Phi bands: Nogueira et al. 2018 Table 3 (<0.40 poor; 0.40-0.75 intermediate to good; >0.75 excellent)
+  k: 25                    # Phi is judged at k = 25
+  robust_auc_min: 0.98
