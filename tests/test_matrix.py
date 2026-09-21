@@ -139,3 +139,12 @@ def test_processing_month_and_subsets(project):
     assert not set(dec.X.index[dec.y == 1]) == set(ctrl.X.index[ctrl.y == 1])
     with pytest.raises(ValueError):
         restrict_subset(data, "nope")
+
+
+def test_parallel_folds_give_identical_results(project):
+    root, cfg_path, *_ = project
+    par = {**CFG, "parallel_folds": 2}
+    p = root / "par.yaml"; p.write_text(yaml.safe_dump(par))
+    a = mx.run_matrix(cfg_path, root, out_root=root / "seq"); b = mx.run_matrix(p, root, out_root=root / "par")
+    for f in ("rankings.csv.gz", "predictions.csv.gz"):
+        pd.testing.assert_frame_equal(pd.read_csv(a / f), pd.read_csv(b / f), check_exact=True)

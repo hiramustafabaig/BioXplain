@@ -151,19 +151,29 @@ def run_matrix(config_path, root, out_root=None, resume_dir=None) -> pathlib.Pat
     cfg["_probe_to_gene"] = data.probe_to_gene
     is_null = cfg["labels"] == "permuted"
     split_seed = cfg["seed"] + (SEED_OFFSET_NULL * (1 + cfg["null"]["replicate"]) if is_null else 0)
+    splits = list(repeated_stratified_splits(y, cfg["cv"]["n_splits"], cfg["cv"]["n_repeats"], split_seed))
+    key_prefix = [10_000 + cfg["null"]["replicate"]] if is_null else []
+    cache = {(sp.repeat, sp.fold): out / "folds" / f"fold_r{sp.repeat}_f{sp.fold}.pkl" for sp in splits}   # Split holds arrays: not hashable
+    todo = [sp for sp in splits if not cache[(sp.repeat, sp.fold)].exists()]
+
+    def compute(sp):
+        tf = time.perf_counter()
+        res = run_matrix_fold(data.X, y, sp.train_idx, sp.test_idx, cfg, key_prefix + [sp.repeat, sp.fold])
+        res.timings["fold_total"] = time.perf_counter() - tf
+        return res
+
+    workers = int(cfg.get("parallel_folds", 1))
+    if workers > 1 and len(todo) > 1:                       # results do not depend on the worker count: every fold is seeded independently
+        from joblib import Parallel, delayed
+        computed = Parallel(n_jobs=workers)(delayed(compute)(sp) for sp in todo)
+    else:
+        computed = [compute(sp) for sp in todo]
+    for sp, res in zip(todo, computed):
+        cache[(sp.repeat, sp.fold)].write_bytes(pickle.dumps(res))
     fold_times, results = [], []
-    for sp in repeated_stratified_splits(y, cfg["cv"]["n_splits"], cfg["cv"]["n_repeats"], split_seed):
-        f = out / "folds" / f"fold_r{sp.repeat}_f{sp.fold}.pkl"
-        if f.exists():
-            res = pickle.loads(f.read_bytes())
-        else:
-            tf = time.perf_counter()
-            seed_key = ([10_000 + cfg["null"]["replicate"]] if is_null else []) + [sp.repeat, sp.fold]
-            res = run_matrix_fold(data.X, y, sp.train_idx, sp.test_idx, cfg, seed_key)
-            res.timings["fold_total"] = time.perf_counter() - tf
-            f.write_bytes(pickle.dumps(res))
-        key = {"repeat": sp.repeat, "fold": sp.fold, "seed": sp.seed}
-        results.append((key, res))
+    for sp in splits:
+        res = pickle.loads(cache[(sp.repeat, sp.fold)].read_bytes())
+        results.append(({"repeat": sp.repeat, "fold": sp.fold, "seed": sp.seed}, res))
         fold_times.append(res.timings.get("fold_total", float("nan")))
     rank = pd.concat([r.rankings.assign(**k) for k, r in results], ignore_index=True)
     pred = pd.concat([r.predictions.assign(**k) for k, r in results], ignore_index=True)
