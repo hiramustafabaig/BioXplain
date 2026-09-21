@@ -130,8 +130,11 @@ def run_matrix_fold(X: pd.DataFrame, y: np.ndarray, train_idx, test_idx, cfg: di
 
 def prepare_data(cfg: dict, root) -> tuple[DiscoveryData, np.ndarray, dict]:
     data = restrict_subset(load_discovery(root), cfg["subset"], cfg.get("subset_seed", 0))
+    if cfg.get("exclude_genes"):                     # composition ablation (A6): remove all probes of the listed genes from the universe
+        keep = ~data.probe_to_gene.isin(set(cfg["exclude_genes"]))
+        data = DiscoveryData(X=data.X.loc[:, keep[keep].index], y=data.y, samples=data.samples, probe_to_gene=data.probe_to_gene[keep], entrez=data.entrez)
     y = data.y.to_numpy()
-    info = {"subset": cfg["subset"], "n_samples": int(len(y)), "n_cancer": int(y.sum()), "n_normal": int((y == 0).sum()), "labels": cfg["labels"]}
+    info = {"excluded_genes": cfg.get("exclude_genes", []), "subset": cfg["subset"], "n_samples": int(len(y)), "n_cancer": int(y.sum()), "n_normal": int((y == 0).sum()), "labels": cfg["labels"]}
     if cfg["labels"] == "permuted":
         b = cfg["null"]["replicate"]
         y = np.random.default_rng(np.random.SeedSequence([cfg["seed"], 777, b])).permutation(y)     # class counts preserved
@@ -157,19 +160,22 @@ def run_matrix(config_path, root, out_root=None, resume_dir=None) -> pathlib.Pat
     todo = [sp for sp in splits if not cache[(sp.repeat, sp.fold)].exists()]
 
     def compute(sp):
+        """Compute one fold and cache it IMMEDIATELY (atomic rename), so an interrupted run loses at most the folds in flight."""
         tf = time.perf_counter()
         res = run_matrix_fold(data.X, y, sp.train_idx, sp.test_idx, cfg, key_prefix + [sp.repeat, sp.fold])
         res.timings["fold_total"] = time.perf_counter() - tf
-        return res
+        target = cache[(sp.repeat, sp.fold)]
+        tmp = target.with_suffix(".tmp")
+        tmp.write_bytes(pickle.dumps(res))
+        tmp.replace(target)
 
     workers = int(cfg.get("parallel_folds", 1))
     if workers > 1 and len(todo) > 1:                       # results do not depend on the worker count: every fold is seeded independently
         from joblib import Parallel, delayed
-        computed = Parallel(n_jobs=workers)(delayed(compute)(sp) for sp in todo)
+        Parallel(n_jobs=workers)(delayed(compute)(sp) for sp in todo)
     else:
-        computed = [compute(sp) for sp in todo]
-    for sp, res in zip(todo, computed):
-        cache[(sp.repeat, sp.fold)].write_bytes(pickle.dumps(res))
+        for sp in todo:
+            compute(sp)
     fold_times, results = [], []
     for sp in splits:
         res = pickle.loads(cache[(sp.repeat, sp.fold)].read_bytes())

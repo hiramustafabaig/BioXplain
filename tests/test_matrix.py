@@ -148,3 +148,25 @@ def test_parallel_folds_give_identical_results(project):
     a = mx.run_matrix(cfg_path, root, out_root=root / "seq"); b = mx.run_matrix(p, root, out_root=root / "par")
     for f in ("rankings.csv.gz", "predictions.csv.gz"):
         pd.testing.assert_frame_equal(pd.read_csv(a / f), pd.read_csv(b / f), check_exact=True)
+
+
+def test_completed_folds_are_cached_even_if_a_later_fold_fails(project, monkeypatch):
+    """Resumability under failure: folds finished before a crash stay on disk (written per fold, atomically)."""
+    root, cfg_path, *_ = project
+    real = mx.run_matrix_fold
+    calls = {"n": 0}
+
+    def flaky(*a, **kw):
+        calls["n"] += 1
+        if calls["n"] == 4:
+            raise RuntimeError("simulated crash")
+        return real(*a, **kw)
+
+    monkeypatch.setattr(mx, "run_matrix_fold", flaky)
+    out = root / "crash"
+    with pytest.raises(RuntimeError, match="simulated crash"):
+        mx.run_matrix(cfg_path, root, resume_dir=out)
+    assert len(list((out / "folds").glob("*.pkl"))) == 3 and not list((out / "folds").glob("*.tmp"))
+    monkeypatch.setattr(mx, "run_matrix_fold", real)
+    mx.run_matrix(cfg_path, root, resume_dir=out)             # resumes and finishes
+    assert len(list((out / "folds").glob("*.pkl"))) == 8
