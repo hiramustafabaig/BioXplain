@@ -1,0 +1,19 @@
+# Phase 7 pilot: 2 repeats x 5 folds, all core model x explainer pipelines + t-test baseline + analytic-sensitivity LR settings.
+name: pilot_matrix
+dataset: GSE42568
+subset: full
+seed: 20260921
+cv: {n_splits: 5, n_repeats: 2}
+preprocessing: {min_detect_frac_of_minority: 0.5, collapse_rule: max_mean}
+top_k: [10, 25, 50]
+store_top: 200
+n_perm: 10
+bootstrap: {n_boot: 2000}
+baseline: {ttest: true, ttest_lr_k: 25}
+configs:
+  - {id: logreg, model: {name: logreg}, explainers: [coef, shap, perm], role: primary}
+  - {id: svm, model: {name: svm}, explainers: [coef, shap, perm], role: primary}
+  - {id: rf, model: {name: rf}, explainers: [shap, perm], role: primary}
+  - {id: xgb, model: {name: xgb}, explainers: [shap, perm], role: primary}
+  - {id: logreg_C0.1, model: {name: logreg, C: 0.1}, explainers: [coef], role: sensitivity}
+  - {id: logreg_C100, model: {name: logreg, C: 100}, explainers: [coef], role: sensitivity}

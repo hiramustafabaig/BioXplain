@@ -112,17 +112,17 @@ class FoldPreprocessor:
         self.filter_ = FloorDetectionFilter(self.min_detect_frac_of_minority).fit(X_train, y_train)
         Xf = self.filter_.transform(X_train)
         self.collapser_ = ProbeGeneCollapser(self.probe_to_gene, self.collapse_rule).fit(Xf)
-        if self.scale:
-            Xg = self.collapser_.transform(Xf)
-            self.mean_ = Xg.mean(axis=0)
-            std = Xg.std(axis=0, ddof=0)
-            self.std_ = std.where(std > 0, 1.0)
+        Xg = self.collapser_.transform(Xf)                       # scaling statistics are ALWAYS learned (training rows only)
+        self.mean_ = Xg.mean(axis=0)
+        std = Xg.std(axis=0, ddof=0)
+        self.std_ = std.where(std > 0, 1.0)
         self.genes_ = self.collapser_.genes_
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, scale: bool | None = None) -> pd.DataFrame:
+        """Filter -> collapse -> optional z-scoring with TRAINING statistics; ``scale=None`` uses the constructor setting."""
         Xg = self.collapser_.transform(self.filter_.transform(X))
-        if self.scale:
+        if self.scale if scale is None else scale:
             Xg = (Xg - self.mean_) / self.std_
         return Xg
 

@@ -5,6 +5,7 @@ import json
 import pathlib
 from dataclasses import dataclass
 
+import numpy as np
 import pandas as pd
 
 from bioxplain.data.geo import read_series_matrix, sample_table
@@ -46,3 +47,33 @@ def load_discovery(root: str | pathlib.Path, verify: bool = True) -> DiscoveryDa
     probe_to_gene = universe.set_index("probe_id")["gene_symbol"]
     entrez = universe.drop_duplicates("gene_symbol").set_index("gene_symbol")["entrez_id"]
     return DiscoveryData(X=X, y=y.loc[X.index], samples=samples, probe_to_gene=probe_to_gene, entrez=entrez)
+
+
+def processing_month(titles: pd.Series) -> pd.Series:
+    """'yy-mm' processing month parsed from GSE42568 sample titles like 'Breast cancer, T98_22_12_04' (day_month_year);
+    NaN where the title carries no date (3 tumours)."""
+    core = titles.str.replace(r"^(Normal breast|Breast cancer), ", "", regex=True)
+    parts = core.str.extract(r"^[A-Za-z]+\w+?_(\d+)_(\d+)_(\d+)$")
+    month = parts[2].str.zfill(2) + "-" + parts[1].str.zfill(2)
+    return month
+
+
+def restrict_subset(data: DiscoveryData, subset: str, seed: int = 0) -> DiscoveryData:
+    """'full' | 'dec2004' (pre-specified processing-date sensitivity: samples processed 2004-12; undated tumours excluded) |
+    'random_control' (a size-matched random subset with the same class counts as dec2004: a control for sample size alone)."""
+    if subset == "full":
+        return data
+    month = processing_month(data.samples["title"]).reindex(data.X.index)
+    dec = (month == "04-12").to_numpy()
+    if subset == "dec2004":
+        keep = dec
+    elif subset == "random_control":
+        rng = np.random.default_rng(seed)
+        y = data.y.to_numpy()
+        n0, n1 = int(((y == 0) & dec).sum()), int(((y == 1) & dec).sum())
+        keep = np.zeros(len(y), bool)
+        keep[rng.choice(np.flatnonzero(y == 0), n0, replace=False)] = True
+        keep[rng.choice(np.flatnonzero(y == 1), n1, replace=False)] = True
+    else:
+        raise ValueError(f"unknown subset {subset!r}")
+    return DiscoveryData(X=data.X.loc[keep], y=data.y.loc[keep], samples=data.samples.loc[keep], probe_to_gene=data.probe_to_gene, entrez=data.entrez)
