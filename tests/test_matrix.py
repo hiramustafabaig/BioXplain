@@ -170,3 +170,10 @@ def test_completed_folds_are_cached_even_if_a_later_fold_fails(project, monkeypa
     monkeypatch.setattr(mx, "run_matrix_fold", real)
     mx.run_matrix(cfg_path, root, resume_dir=out)             # resumes and finishes
     assert len(list((out / "folds").glob("*.pkl"))) == 8
+
+
+def test_empty_config_file_gives_a_clear_error(tmp_path):
+    """Regression: an empty YAML file used to fail with an unhelpful TypeError."""
+    p = tmp_path / "empty.yaml"; p.write_text("")
+    with pytest.raises(ValueError, match="empty or not a YAML mapping"):
+        mx.load_matrix_config(p)

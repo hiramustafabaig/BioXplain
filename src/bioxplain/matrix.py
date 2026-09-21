@@ -38,6 +38,8 @@ SEED_OFFSET_NULL = 100_000
 
 def load_matrix_config(path) -> dict:
     cfg = yaml.safe_load(pathlib.Path(path).read_text())
+    if not isinstance(cfg, dict):
+        raise ValueError(f"config {path} is empty or not a YAML mapping")
     missing = [k for k in REQUIRED if k not in cfg]
     if missing:
         raise ValueError(f"config {path} is missing keys: {missing}")
