@@ -14,16 +14,17 @@ metadata only.
 """
 from __future__ import annotations
 
-import collections
 import gzip
 import hashlib
-import io
 import json
 import pathlib
 import re
 
 import numpy as np
 import pandas as pd
+
+from bioxplain.data.geo import read_gpl_annotation, read_series_matrix
+from bioxplain.data.geo import sample_table as characteristics
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 FILES = {
@@ -32,57 +33,6 @@ FILES = {
 }
 GPL = ROOT / "data/raw/GPL570/GPL570.annot.gz"
 TUMOUR_GROUPS = ["TNBC", "Her2", "Luminal A", "Luminal B"]
-
-
-def read_series_matrix(path: pathlib.Path):
-    """Return (header: dict[str, list[list[str]]], expression: DataFrame probes x GSM)."""
-    header: dict[str, list[list[str]]] = collections.defaultdict(list)
-    table_lines: list[str] = []
-    in_table = False
-    with gzip.open(path, "rt", encoding="utf-8", errors="replace") as fh:
-        for line in fh:
-            line = line.rstrip("\n")
-            if line.startswith("!series_matrix_table_begin"):
-                in_table = True
-            elif line.startswith("!series_matrix_table_end"):
-                in_table = False
-            elif in_table:
-                table_lines.append(line)
-            elif line.startswith("!"):
-                parts = line.split("\t")
-                header[parts[0]].append([p.strip('"') for p in parts[1:]])
-    expr = pd.read_csv(io.StringIO("\n".join(table_lines)), sep="\t", index_col=0, quotechar='"')
-    expr.index = expr.index.astype(str).str.strip('"')
-    expr.columns = [c.strip('"') for c in expr.columns]
-    return header, expr
-
-
-def characteristics(header) -> pd.DataFrame:
-    """Tidy per-sample table from repeated !Sample_characteristics_ch1 rows (+ title/source/description)."""
-    gsm = header["!Sample_geo_accession"][0]
-    cols = {}
-    for row in header["!Sample_characteristics_ch1"]:
-        keys = {r.split(":", 1)[0].strip() for r in row if ":" in r}
-        key = keys.pop() if len(keys) == 1 else "|".join(sorted(keys))
-        cols[key] = [r.split(":", 1)[1].strip() if ":" in r else r.strip() for r in row]
-    df = pd.DataFrame(cols, index=gsm)
-    df.insert(0, "title", header["!Sample_title"][0])
-    df.insert(1, "source_name", header["!Sample_source_name_ch1"][0])
-    df.insert(2, "description", header["!Sample_description"][0])
-    return df
-
-
-def read_gpl_annotation(path: pathlib.Path) -> pd.DataFrame:
-    rows, in_table = [], False
-    with gzip.open(path, "rt", encoding="utf-8", errors="replace") as fh:
-        for line in fh:
-            if line.startswith("!platform_table_begin"):
-                in_table = True
-            elif line.startswith("!platform_table_end"):
-                in_table = False
-            elif in_table:
-                rows.append(line.rstrip("\n"))
-    return pd.read_csv(io.StringIO("\n".join(rows)), sep="\t", dtype=str, keep_default_na=False, quoting=3)
 
 
 def scale_summary(expr: pd.DataFrame) -> dict:

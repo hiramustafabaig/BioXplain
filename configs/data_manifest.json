@@ -1,0 +1,28 @@
+{
+  "description": "Provenance of raw inputs. Raw files are NOT stored in git; verify with sha256 after download.",
+  "downloaded_utc": "2026-09-20",
+  "source": "NCBI GEO FTP",
+  "files": {
+    "GSE42568": {
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE42nnn/GSE42568/matrix/GSE42568_series_matrix.txt.gz",
+      "path": "data/raw/GSE42568/GSE42568_series_matrix.txt.gz",
+      "bytes": 22565943,
+      "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+      "decompressed_bytes": 79859027
+    },
+    "GSE65194": {
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE65nnn/GSE65194/matrix/GSE65194_series_matrix.txt.gz",
+      "path": "data/external/GSE65194/GSE65194_series_matrix.txt.gz",
+      "bytes": 76464351,
+      "sha256": "f92d2109fe0d64ed056d9673e8733b2af25173230f3632e370201b6a4054caba",
+      "decompressed_bytes": 165378449
+    },
+    "GPL570": {
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/platforms/GPLnnn/GPL570/annot/GPL570.annot.gz",
+      "path": "data/raw/GPL570/GPL570.annot.gz",
+      "bytes": 8471521,
+      "sha256": "d7cd44352127b1e34f3a720ebea86093ef255a38f1612a85a2962b71bde8f394",
+      "decompressed_bytes": 39459873
+    }
+  }
+}

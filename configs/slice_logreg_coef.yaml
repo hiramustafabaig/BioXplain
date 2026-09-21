@@ -1,0 +1,22 @@
+# Phase 2 vertical slice: GSE42568 -> leakage-safe CV -> L2 logistic regression -> |coef| ranking -> stability.
+# Pilot size only (2 repeats x 5 folds). Parameter choices follow docs/methodology_decisions.md.
+name: slice_logreg_coef
+dataset: GSE42568
+seed: 20260921               # D22: split seed for repeat r = seed + r
+cv:
+  n_splits: 5
+  n_repeats: 2
+preprocessing:
+  min_detect_frac_of_minority: 0.5   # D7
+  collapse_rule: max_mean            # D6 (sensitivity: max_variance)
+  scale: true                        # D8
+model:
+  name: logreg                       # D10/D11: fixed, not tuned
+  C: 1.0
+  class_weight: balanced
+  max_iter: 5000
+explainer: coef                      # D12
+top_k: [10, 25, 50]                  # D13
+store_top: 200
+bootstrap:
+  n_boot: 2000                       # D21
