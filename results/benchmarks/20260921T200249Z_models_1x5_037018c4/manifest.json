@@ -1,0 +1,68 @@
+{
+  "id": "20260921T200249Z_models_1x5_037018c4",
+  "started_utc": "2026-09-21T20:02:49.691524+00:00",
+  "config": {
+    "seed": 20260921,
+    "cv": {
+      "n_splits": 5,
+      "n_repeats": 1
+    },
+    "preprocessing": {
+      "min_detect_frac_of_minority": 0.5,
+      "collapse_rule": "max_mean"
+    },
+    "models": {
+      "logreg": {
+        "name": "logreg",
+        "C": 1.0,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      "svm": {
+        "name": "svm",
+        "C": 1.0,
+        "loss": "squared_hinge",
+        "class_weight": "balanced",
+        "max_iter": 20000
+      },
+      "rf": {
+        "name": "rf",
+        "n_estimators": 500,
+        "max_features": "sqrt",
+        "min_samples_leaf": 1,
+        "class_weight": "balanced_subsample",
+        "n_jobs": 4
+      },
+      "xgb": {
+        "name": "xgb",
+        "n_estimators": 300,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.5,
+        "tree_method": "hist",
+        "n_jobs": 4
+      }
+    }
+  },
+  "config_sha256": "037018c4656bb5894b32b941743e5fa3d1bc4aa701628e5d696b9628969ce74f",
+  "git": {
+    "commit": "d2c2dcfe3d93d8914522e19e9fca97fe97338cc4",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "n_samples": 121,
+  "n_normal": 17
+}

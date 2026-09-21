@@ -78,3 +78,17 @@ Format: dated entries; problems are recorded as Problem / Expected / Actual / Di
 **Problem/test decisions:**
 1. The criterion k was hard-coded to 25 in the implementation, which crashed on the toy config (KeyError). Category A (implementation lacked a parameter and validation): made `criterion.k` explicit, validated it against `top_k`, and added a test.
 2. `(Series == pytest.approx(1.0)).all()` did not compare element-wise as intended (category B, test bug). I first verified that the underlying values were exactly 1.0, then replaced the assertion with an explicit tolerance check that still fails on wrong values.
+
+## 2026-09-22 - Phase 3: Linear SVM, Random Forest, XGBoost added and benchmarked
+
+**Result:** All four models run through the same leakage-safe `run_fold` with pre-specified parameters (D11b). Single-fold pilot passed for each model; 1x5 benchmark (`results/benchmarks/20260921T200249Z_models_1x5_037018c4`, code `d2c2dcf`, clean tree): pooled ROC-AUC LR 0.999, SVM 0.998, RF 0.995, XGBoost 0.988 (overlapping CIs; no model declared better); normal-class AP 0.997 / 0.988 / 0.975 / 0.936. Model support: LR and SVM 100% of genes; RF about 1,172 genes (5.8%); XGBoost about 24 genes. Fit times per fold: 0.3 / 0.2 / 1.6 / 8.8 s. 103 tests pass; the leakage-invariance test now covers all four models (mutation-tested).
+- **Findings:** XGBoost is not thread-count invariant (scores differ by ~1e-2 between n_jobs 1 and 4; RF is) -> n_jobs=4 pinned and recorded. Unused genes have exactly zero permutation effect (premise of D12b confirmed empirically). Tree supports are sparse, so XGBoost top-25 and top-50 sets equal its whole support (D13b consequence).
+- **Impact on research question:** none; sparse tree attributions are an observation the stability study must report, and model-dimension comparisons must use Phi (variable set sizes).
+
+**Problem:** the decision table D11b said predicted label "p >= 0.5" but the implementation uses each estimator's own `predict` (strictly > 0.5; margin > 0 for the SVM). Diagnosis: documentation imprecision, not a code defect (LR pilot predictions verified identical to the score >= 0.5 rule; ties are essentially impossible for LR). Fix: documented the strict rule in D11b; the benchmark and bootstrap use the stored predicted labels.
+
+**Problem (provenance):** my first benchmark ran on an uncommitted tree, so its manifest would have recorded `dirty=true`. I discarded it, committed the code, and re-ran on the clean commit; results were identical (excluding timings), manifest `dirty=false`.
+
+**Problem (test scope):** extending `run_fold` diagnostics with wall-clock timings made the earlier leakage test (`d0 == d1` on all diagnostics) fail conceptually, since timings legitimately differ between calls. Category B (the test compared too much): the comparison now excludes only the two timing keys (`prep_seconds`, `fit_seconds`); every learned quantity is still compared exactly.
+
+**Process note:** the three models share one factory/`run_fold` refactor and were committed together, not as three artificial intermediate commits.
