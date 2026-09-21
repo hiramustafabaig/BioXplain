@@ -15,7 +15,15 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 if __name__ == "__main__":
     run = pathlib.Path(sys.argv[1])
-    fz = create_freeze(ROOT, run if run.is_absolute() else ROOT / run)
+    run = run if run.is_absolute() else ROOT / run
+    from bioxplain.utils.provenance import sha256_file
+    refs = {}
+    for name, rel in {"observed_vs_null": run / "analysis/observed_vs_null.csv", "null_repeat_level": run / "analysis/null_repeat_level_stability.csv",
+                      "sensitivity_summary": ROOT / "results/sensitivity_summary.json"}.items():
+        if rel.exists():
+            refs[name] = {"path": str(rel.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256_file(rel)}
+    refs["null_replicates"] = len(list((ROOT / "results/null/main").glob("rep_*/manifest.json")))
+    fz = create_freeze(ROOT, run, extra_refs=refs)
     c = fz["consensus"]["lists"]
     md = [
         "# Discovery freeze", "",

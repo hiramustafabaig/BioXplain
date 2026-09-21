@@ -1,0 +1,104 @@
+{
+  "run_id": "20260921T224019Z_null_rep019_fd9f8950",
+  "started_utc": "2026-09-21T22:40:19.013306+00:00",
+  "config_sha256": "fd9f8950d55ceacb1d108a6bef8e9898839e2f20a26cc0a3f2d4e17d3de72c92",
+  "git": {
+    "commit": "e2c130227885a582230ab7ed384bd0c936cc9ab3",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "data": {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE42nnn/GSE42568/matrix/GSE42568_series_matrix.txt.gz",
+    "path": "data/raw/GSE42568/GSE42568_series_matrix.txt.gz",
+    "bytes": 22565943,
+    "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+    "decompressed_bytes": 79859027
+  },
+  "sample_definition": {
+    "excluded_genes": [],
+    "subset": "full",
+    "n_samples": 121,
+    "n_cancer": 104,
+    "n_normal": 17,
+    "labels": "permuted",
+    "null_replicate": 19
+  },
+  "feature_universe": {
+    "n_probes": 42892,
+    "n_genes": 20848
+  },
+  "resolved_models": {
+    "logreg": {
+      "name": "logreg",
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "svm": {
+      "name": "svm",
+      "C": 1.0,
+      "loss": "squared_hinge",
+      "class_weight": "balanced",
+      "max_iter": 20000
+    },
+    "rf": {
+      "name": "rf",
+      "n_estimators": 500,
+      "max_features": "sqrt",
+      "min_samples_leaf": 1,
+      "class_weight": "balanced_subsample",
+      "n_jobs": 4
+    },
+    "xgb": {
+      "name": "xgb",
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.5,
+      "tree_method": "hist",
+      "n_jobs": 4
+    },
+    "logreg_C0.1": {
+      "name": "logreg",
+      "C": 0.1,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "logreg_C100": {
+      "name": "logreg",
+      "C": 100,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    }
+  },
+  "seed": 20260921,
+  "split_seed": 22260921,
+  "n_folds": 5,
+  "runtime_seconds": {
+    "total": 152.2,
+    "fold_mean": 49.65
+  },
+  "outputs": [
+    "config.yaml",
+    "fold_metrics.csv",
+    "pipelines.csv",
+    "predictions.csv.gz",
+    "rankings.csv.gz",
+    "replicate_config.yaml",
+    "timings.csv",
+    "manifest.json"
+  ]
+}

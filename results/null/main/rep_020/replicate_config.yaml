@@ -1,0 +1,70 @@
+baseline:
+  ttest: true
+  ttest_lr_k: 25
+bootstrap:
+  n_boot: 2000
+configs:
+- explainers:
+  - coef
+  - shap
+  - perm
+  id: logreg
+  model:
+    name: logreg
+  role: primary
+- explainers:
+  - coef
+  - shap
+  - perm
+  id: svm
+  model:
+    name: svm
+  role: primary
+- explainers:
+  - shap
+  - perm
+  id: rf
+  model:
+    name: rf
+  role: primary
+- explainers:
+  - shap
+  - perm
+  id: xgb
+  model:
+    name: xgb
+  role: primary
+- explainers:
+  - coef
+  id: logreg_C0.1
+  model:
+    C: 0.1
+    name: logreg
+  role: sensitivity
+- explainers:
+  - coef
+  id: logreg_C100
+  model:
+    C: 100
+    name: logreg
+  role: sensitivity
+cv:
+  n_repeats: 1
+  n_splits: 5
+dataset: GSE42568
+labels: permuted
+n_perm: 10
+name: null_rep020
+'null':
+  replicate: 20
+parallel_folds: 2
+preprocessing:
+  collapse_rule: max_mean
+  min_detect_frac_of_minority: 0.5
+seed: 20260921
+store_top: 200
+subset: full
+top_k:
+- 10
+- 25
+- 50

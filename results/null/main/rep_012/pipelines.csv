@@ -1,0 +1,14 @@
+pipeline,config_id,model,explainer,role
+logreg|coef,logreg,logreg,coef,primary
+logreg|shap,logreg,logreg,shap,primary
+logreg|perm,logreg,logreg,perm,primary
+svm|coef,svm,svm,coef,primary
+svm|shap,svm,svm,shap,primary
+svm|perm,svm,svm,perm,primary
+rf|shap,rf,rf,shap,primary
+rf|perm,rf,rf,perm,primary
+xgb|shap,xgb,xgb,shap,primary
+xgb|perm,xgb,xgb,perm,primary
+logreg_C0.1|coef,logreg_C0.1,logreg,coef,sensitivity
+logreg_C100|coef,logreg_C100,logreg,coef,sensitivity
+ttest|ttest,ttest,none,ttest,baseline

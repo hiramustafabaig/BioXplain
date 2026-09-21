@@ -1,0 +1,116 @@
+{
+  "sample_definitions": {
+    "full": {
+      "excluded_genes": [],
+      "subset": "full",
+      "n_samples": 121,
+      "n_cancer": 104,
+      "n_normal": 17,
+      "labels": "real"
+    },
+    "dec2004": {
+      "excluded_genes": [],
+      "subset": "dec2004",
+      "n_samples": 105,
+      "n_cancer": 97,
+      "n_normal": 8,
+      "labels": "real"
+    },
+    "control": {
+      "excluded_genes": [],
+      "subset": "random_control",
+      "n_samples": 105,
+      "n_cancer": 97,
+      "n_normal": 8,
+      "labels": "real"
+    },
+    "ablation": {
+      "excluded_genes": [
+        "ADIPOQ",
+        "PLIN1",
+        "FABP4",
+        "LEP",
+        "LPL",
+        "CFD",
+        "ADH1B",
+        "CIDEC",
+        "PLIN4",
+        "CD36",
+        "GPD1"
+      ],
+      "subset": "full",
+      "n_samples": 121,
+      "n_cancer": 104,
+      "n_normal": 17,
+      "labels": "real"
+    }
+  },
+  "date_overlap": {
+    "full_vs_dec2004": {
+      "spearman_universe_selection_frequency": 0.19184688961284965,
+      "top25_jaccard": 0.25,
+      "top25_overlap": 10,
+      "spearman_among_genes_selected_in_either": 0.105066751644276
+    },
+    "full_vs_control": {
+      "spearman_universe_selection_frequency": 0.16313309763808054,
+      "top25_jaccard": 0.25,
+      "top25_overlap": 10,
+      "spearman_among_genes_selected_in_either": 0.06008411415932527
+    },
+    "dec2004_vs_control": {
+      "spearman_universe_selection_frequency": 0.20940915897713017,
+      "top25_jaccard": 0.3888888888888889,
+      "top25_overlap": 14,
+      "spearman_among_genes_selected_in_either": -0.08642539119257346
+    }
+  },
+  "date_mean_abs_phi_change": {
+    "dec2004_vs_full": 0.10726194449543522,
+    "control_vs_full": 0.06474788630163622,
+    "dec2004_vs_control": 0.07326888674260536
+  },
+  "date_consensus_sizes": {
+    "full": 1,
+    "dec2004": 1,
+    "control": 1
+  },
+  "composition_ablation": {
+    "panel_genes_in_full_top25_repeats_0_1": [],
+    "top25_jaccard_full01_vs_ablation": 0.7241379310344828,
+    "top25_overlap": 21,
+    "spearman_universe_frequency": 0.6401166873656675,
+    "mean_abs_phi_change": 0.02084917169944913,
+    "auc_full01": {
+      "logreg": 0.9983,
+      "logreg_C0.1": 0.9977,
+      "logreg_C100": 0.9966,
+      "rf": 0.9932,
+      "svm": 0.9958,
+      "ttest_lr": 0.974,
+      "xgb": 0.9876
+    },
+    "auc_ablation": {
+      "logreg": 0.9966,
+      "logreg_C0.1": 0.9977,
+      "logreg_C100": 0.9966,
+      "rf": 0.9955,
+      "svm": 0.9958,
+      "ttest_lr": 0.9782,
+      "xgb": 0.985
+    }
+  },
+  "panel_genes_in_full_run_selection": {
+    "ADIPOQ": 0.0,
+    "PLIN1": 0.001,
+    "FABP4": 0.076,
+    "LEP": 0.0,
+    "LPL": 0.003,
+    "CFD": 0.0,
+    "ADH1B": 0.005,
+    "CIDEC": 0.0,
+    "PLIN4": 0.0,
+    "CD36": 0.003,
+    "GPD1": 0.0
+  }
+}
