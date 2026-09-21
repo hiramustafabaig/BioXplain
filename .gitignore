@@ -34,3 +34,7 @@ desktop.ini
 # Large generated artefacts (keep small tables/figures)
 results/models/*.pkl
 results/models/*.joblib
+
+# User's own draft and empty placeholder notebook (not part of the software)
+BioXplain_Research_Project_Draft*.docx
+notebooks/01_data_exploration.ipynb
