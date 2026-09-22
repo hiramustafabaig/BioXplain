@@ -85,7 +85,8 @@ def fig_cohort():
     ct = pd.crosstab(d.month, d.label).reindex(["2004-12", "2005-01", "undated"]).fillna(0)
     ct.plot.bar(ax=axes[1], color=["#a4373a", "#1b6ca8"], width=0.8, rot=0); axes[1].set_title("B  Processing month vs class"); axes[1].set_xlabel("")
     pf = pd.crosstab(m.title_prefix, m.label); pf.plot.bar(ax=axes[2], color=["#a4373a", "#1b6ca8"], width=0.8, rot=0, legend=False); axes[2].set_title("C  Title prefix vs class"); axes[2].set_xlabel("")
-    fig.suptitle("Figure 2. Discovery cohort GSE42568: class balance and known processing confounding", x=0.01, ha="left", fontsize=9)
+    fig.suptitle("Figure 2. Discovery cohort GSE42568: class balance and known processing confounding", x=0.01, ha="left", fontsize=9, y=1.08)
+    fig.tight_layout()
     save(fig, "fig02_discovery_cohort")
 
 
@@ -94,12 +95,13 @@ def fig_performance(run):
     p = pd.read_csv(run / "pooled_metrics.csv")
     order = ["logreg", "svm", "rf", "xgb", "logreg_C0.1", "logreg_C100", "ttest_lr"]
     g = p.groupby("config_id")[["roc_auc", "roc_auc_ci_lo", "roc_auc_ci_hi", "ap_normal", "ap_normal_ci_lo", "ap_normal_ci_hi", "balanced_accuracy", "sensitivity", "specificity"]].mean().reindex(order)
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.6), sharey=True)
+    fig, axes = plt.subplots(1, 3, figsize=(7.6, 3.0), sharey=True)
     y = np.arange(len(order))[::-1]
     for ax, (m, lo, hi, t) in zip(axes[:2], [("roc_auc", "roc_auc_ci_lo", "roc_auc_ci_hi", "ROC-AUC"), ("ap_normal", "ap_normal_ci_lo", "ap_normal_ci_hi", "AP (normal class)")]):
         ax.errorbar(g[m], y, xerr=[g[m] - g[lo], g[hi] - g[m]], fmt="o", color="#333", capsize=2, ms=4); ax.set_title(t); ax.set_yticks(y); ax.set_yticklabels(order); ax.set_xlim(0.9, 1.005)
     axes[2].scatter(g["sensitivity"], y, c="#a4373a", label="sensitivity"); axes[2].scatter(g["specificity"], y, c="#1b6ca8", label="specificity"); axes[2].legend(loc="lower left"); axes[2].set_title("Fixed-threshold metrics"); axes[2].set_xlim(0.6, 1.02)
-    fig.suptitle("Figure 3. Out-of-fold performance on GSE42568 (mean of 20 repeats; bootstrap CI). Near-ceiling AUC; models are not ranked", x=0.01, ha="left", fontsize=9)
+    fig.suptitle("Figure 3. Out-of-fold performance on GSE42568 (mean of 20 repeats; bootstrap CI). Near-ceiling AUC; models are not ranked", x=0.01, ha="left", fontsize=9, y=1.08)
+    fig.tight_layout()
     save(fig, "fig03_performance")
 
 
@@ -148,16 +150,17 @@ def fig_null(run, null_dirs):
     from bioxplain.null import compare_observed_null
     comp = compare_observed_null(obs, null); comp.to_csv(run / "analysis/observed_vs_null.csv", index=False)
     sel = [("resampling", g) for g in ["logreg|coef", "svm|coef", "rf|shap", "xgb|shap", "ttest|ttest"]] + [("model", "explainer=shap"), ("explainer", "model=logreg"), ("combined", "all_primary")]
-    fig, axes = plt.subplots(2, 4, figsize=(7.4, 4.0), sharey=True); axes = axes.ravel()
+    fig, axes = plt.subplots(2, 4, figsize=(8.6, 5.4), sharey=True); axes = axes.ravel()
     for ax, (dim, g) in zip(axes, sel):
         n = null[(null.dimension == dim) & (null.group == g) & (null.k == 25)].phi.dropna(); o = obs[(obs.dimension == dim) & (obs.group == g) & (obs.k == 25)].phi.dropna()
         parts = ax.violinplot([n, o], showextrema=False, widths=0.8)
         for pc, c in zip(parts["bodies"], ["#bbbbbb", "#1b6ca8"]):
             pc.set_facecolor(c); pc.set_alpha(0.8)
         ax.scatter(np.full(len(n), 1) + np.random.default_rng(0).uniform(-.1, .1, len(n)), n, s=4, c="#666"); ax.scatter(np.full(len(o), 2) + np.random.default_rng(1).uniform(-.1, .1, len(o)), o, s=4, c="#0b3d63")
-        ax.set_xticks([1, 2]); ax.set_xticklabels([f"null\n(n={len(n)})", f"observed\n(n={len(o)})"]); ax.set_title(f"{dim}: {g}", fontsize=6.5)
+        ax.set_xticks([1, 2]); ax.set_xticklabels([f"null\n(n={len(n)})", f"observed\n(n={len(o)})"], fontsize=6.5); ax.set_title(f"{dim}: {g}", fontsize=6.5, pad=4)
     axes[0].set_ylabel("Φ at k = 25"); axes[4].set_ylabel("Φ at k = 25")
-    fig.suptitle("Figure 6. Observed stability (real labels) vs permutation-label null; unit = one 5-fold repeat, same pipeline", x=0.01, ha="left", fontsize=9)
+    fig.suptitle("Figure 6. Observed stability (real labels) vs permutation-label null; unit = one 5-fold repeat, same pipeline", x=0.01, ha="left", fontsize=9, y=1.03)
+    fig.tight_layout(h_pad=3.0)
     save(fig, "fig06_observed_vs_null")
 
 
@@ -178,7 +181,7 @@ def fig_top_genes(run):
 # ---------------------------------------------------------------- Fig 8: external replication
 def fig_external(ext):
     s = json.loads((ext / "summary.json").read_text()); pg = pd.read_csv(ext / "per_gene_external_effects.csv"); ll = pd.read_csv(ext / "list_level_replication.csv")
-    fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.7))
+    fig, axes = plt.subplots(1, 3, figsize=(9.0, 3.2))
     ax = axes[0]; sel = pg.s_g_k25 > 0
     ax.scatter(pg.e_disc.abs()[~sel], pg.aligned_effect[~sel], s=1, c="#cccccc", label="s = 0"); ax.scatter(pg.e_disc.abs()[sel], pg.aligned_effect[sel], s=5, c=pg.s_g_k25[sel], cmap="viridis", label="selected")
     ax.axhline(0, c="k", lw=.5); ax.set_xlabel("|discovery effect| (AUC − 0.5)"); ax.set_ylabel("aligned external effect"); ax.set_title("A  Gene-level effects")
@@ -189,7 +192,8 @@ def fig_external(ext):
     l = ll.dropna(subset=["signature_auc_external"]); ci = l["signature_auc_external_ci"].map(lambda x: json.loads(x.replace("(", "[").replace(")", "]")) if isinstance(x, str) else [np.nan] * 2)
     axes[2].errorbar(range(len(l)), l.signature_auc_external, yerr=[l.signature_auc_external - [c[0] for c in ci], [c[1] for c in ci] - l.signature_auc_external], fmt="o", c="k", capsize=3)
     axes[2].set_xticks(range(len(l))); axes[2].set_xticklabels(l["list"]); axes[2].set_ylim(0.4, 1.02); axes[2].axhline(0.5, ls=":", c="#888"); axes[2].set_title("C  Frozen-signature AUC (external)")
-    fig.suptitle("Figure 8. External replication on GSE65194 (130 tumours + 11 healthy; scale-free endpoints; same platform)", x=0.01, ha="left", fontsize=9)
+    fig.suptitle("Figure 8. External replication on GSE65194 (130 tumours + 11 healthy; scale-free endpoints; same platform)", x=0.01, ha="left", fontsize=9, y=1.08)
+    fig.tight_layout()
     save(fig, "fig08_external_replication")
 
 
