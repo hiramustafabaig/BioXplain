@@ -1,0 +1,96 @@
+{
+  "primary_gene_level": {
+    "tag": "primary_mean_of_duplicates",
+    "c1_spearman": 0.1194770128450129,
+    "c1_spearman_selected_only": 0.241021105332554,
+    "c2_rank_coef_stability": 0.1620990929368897,
+    "c2_rank_coef_discovery_effect": 0.15069569451626633,
+    "c2_partial_spearman": 0.07977226369449408,
+    "n_genes": 20118,
+    "n_selected": 1850,
+    "spearman_e_disc_e_ext_all_genes": 0.32059240601262096,
+    "direction_all_genes": {
+      "n": 20118,
+      "n_consistent": 12127,
+      "fraction": 0.60279351824237,
+      "ci_lo": 0.5959926269243692,
+      "ci_hi": 0.609564690590286
+    },
+    "n_units": 141,
+    "n_normal": 11,
+    "c1_spearman_ci": [
+      0.09599455313538027,
+      0.13649277856484682
+    ],
+    "c1_spearman_selected_only_ci": [
+      0.20984904640345176,
+      0.25551150616857055
+    ],
+    "c2_rank_coef_stability_ci": [
+      0.1305177803822059,
+      0.17666594996865206
+    ],
+    "c2_partial_spearman_ci": [
+      0.06467005147032415,
+      0.0869031892418159
+    ]
+  },
+  "sample_level_frozen_lr_S_top25": {
+    "roc_auc": 0.9986013986013985,
+    "ap_cancer": 0.9998834498834498,
+    "ap_normal": 0.9841597796143251,
+    "balanced_accuracy": 0.9052447552447553,
+    "sensitivity": 0.9923076923076923,
+    "specificity": 0.8181818181818182,
+    "f1_cancer": 0.9885057471264368,
+    "f1_normal": 0.8571428571428571,
+    "tn": 9,
+    "fp": 2,
+    "fn": 1,
+    "tp": 129,
+    "roc_auc_ci": [
+      0.9937062937062937,
+      1.0
+    ],
+    "ap_normal_ci": [
+      0.9383116883116883,
+      1.0
+    ],
+    "balanced_accuracy_ci": [
+      0.7688811188811189,
+      1.0
+    ],
+    "n": 141,
+    "n_normal": 11
+  },
+  "composition": {
+    "panel_genes_present_in_eligible_universe": [
+      "ADIPOQ",
+      "PLIN1",
+      "FABP4",
+      "LEP",
+      "LPL",
+      "CFD",
+      "ADH1B",
+      "CIDEC",
+      "PLIN4",
+      "CD36",
+      "GPD1"
+    ],
+    "external": {
+      "adipose_panel_auc_cancer_vs_normal": 0.004195804195804195,
+      "spearman_signature_vs_panel_within_cancer": -0.3031340042879187,
+      "spearman_signature_vs_panel_within_normal": -0.690909090909091,
+      "signature_auc": 0.9951048951048951,
+      "signature_auc_after_removing_panel_component": 0.5720279720279721
+    },
+    "discovery": {
+      "adipose_panel_auc_cancer_vs_normal": 0.08653846153846156,
+      "spearman_signature_vs_panel_within_cancer": -0.09766350154699671,
+      "spearman_signature_vs_panel_within_normal": -0.9583333333333335,
+      "signature_auc": 1.0,
+      "signature_auc_after_removing_panel_component": 0.9547511312217194
+    }
+  },
+  "n_boot": 1000
+}

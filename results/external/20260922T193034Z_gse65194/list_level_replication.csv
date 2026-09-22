@@ -1,0 +1,4 @@
+list,n_genes,note,direction,mean_aligned_effect,spearman_e_disc_e_ext,mean_aligned_hedges_g_ext,signature_auc_external,signature_auc_external_ci,signature_auc_discovery_in_sample,n_up,n_down
+S_cons,1,too few genes for list-level statistics,,,,,,,,,
+S_top25,25,,"{'n': 25, 'n_consistent': 23, 'fraction': 0.92, 'ci_lo': 0.7396941578947859, 'ci_hi': 0.990160409980942}",0.3041118881118881,0.7774572176899175,1.7528744974528256,0.9951048951048951,"(0.9818181818181818, 1.0)",1.0,9.0,16.0
+S_top50,50,,"{'n': 50, 'n_consistent': 47, 'fraction': 0.94, 'ci_lo': 0.8345180533962271, 'ci_hi': 0.9874514121646659}",0.3463776223776223,0.7768920485331237,2.050978748265273,1.0,"(1.0, 1.0)",1.0,18.0,32.0

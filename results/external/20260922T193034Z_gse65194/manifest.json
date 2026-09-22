@@ -1,0 +1,35 @@
+{
+  "freeze_commit": "bed57e4db41a66c136980050f6299712ab746b8a",
+  "git": {
+    "commit": "7314da6699353fd2600fa8e53f07e67b618c7dbc",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "external_units": {
+    "n": 141,
+    "n_normal": 11,
+    "n_tumour": 130,
+    "n_arrays_used": 164,
+    "n_duplicated_tumours": 23
+  },
+  "runtime_seconds": 545.5,
+  "outputs": [
+    "composition_panel.csv",
+    "list_level_replication.csv",
+    "per_gene_external_effects.csv",
+    "sensitivity_gene_level.json",
+    "summary.json"
+  ]
+}
