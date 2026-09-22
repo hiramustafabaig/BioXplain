@@ -1,0 +1,282 @@
+{
+  "frozen_utc": "2026-09-22T19:29:58.975548+00:00",
+  "git": {
+    "commit": "bed57e4db41a66c136980050f6299712ab746b8a",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "discovery_run": {
+    "dir": "results/matrix/20260921T210020Z_full_matrix_5367d04d",
+    "run_id": "20260921T210020Z_full_matrix_5367d04d",
+    "config_sha256": "5367d04dda00ec4da0df712810c72ea96e2bd128925f970b9ff02a2f52478802",
+    "code_commit_of_run": "ddb6cf92d442850a0166c03d808d55cf4132477d",
+    "n_folds": 100,
+    "seed": 20260921,
+    "files_sha256": {
+      "rankings.csv.gz": "396277ee14d8de6984d8fc8f10be864b65d22132a4f848166a83f0734c4676a0",
+      "pipelines.csv": "064749ca70405b81fcadbb2f1014dd0c852a8526bd00eb8f26d2895b06f873ef",
+      "config.yaml": "772a79082f75e8ca4b09b1101dd3ae92cac239ef14b3990b3be3b66a6283b0df",
+      "manifest.json": "024dfbad3305d9d7a21c3012514ed1f6ba96193484d211001588af47fd4bd0ba",
+      "predictions.csv.gz": "66b7f4a38c90879af1e729803848b24f6aaed24b58376d9f4a774517bb8e321e"
+    }
+  },
+  "data": {
+    "discovery_dataset": "GSE42568",
+    "discovery_file": {
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE42nnn/GSE42568/matrix/GSE42568_series_matrix.txt.gz",
+      "path": "data/raw/GSE42568/GSE42568_series_matrix.txt.gz",
+      "bytes": 22565943,
+      "sha256": "43b93f72f1d81838dcd2a5b6ccc3bc1875e46230dad0d7346236773a99e32b76",
+      "decompressed_bytes": 79859027
+    },
+    "sample_definition": {
+      "excluded_genes": [],
+      "subset": "full",
+      "n_samples": 121,
+      "n_cancer": 104,
+      "n_normal": 17,
+      "labels": "real"
+    },
+    "feature_universe_file": "configs/feature_universe.tsv",
+    "feature_universe_sha256": "aee3269ffcdd7b1bd3d953579170867b9edf427c0afe8d396abc6c96a43a526d",
+    "n_universe_probes": 42892,
+    "n_universe_genes": 20848,
+    "n_eligible_genes_full_cohort": 20118
+  },
+  "preprocessing": {
+    "expression_filter": "floor detection; detected in >= ceil(0.5 * n_minority_train) training samples (D7)",
+    "probe_collapse": "max training mean, ties by probe id (D6); frozen probe per gene chosen on the full discovery cohort",
+    "scaling": "z-score with training statistics for LR/SVM; log2 values for trees (D8)"
+  },
+  "models": {
+    "logreg": {
+      "name": "logreg",
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "svm": {
+      "name": "svm",
+      "C": 1.0,
+      "loss": "squared_hinge",
+      "class_weight": "balanced",
+      "max_iter": 20000
+    },
+    "rf": {
+      "name": "rf",
+      "n_estimators": 500,
+      "max_features": "sqrt",
+      "min_samples_leaf": 1,
+      "class_weight": "balanced_subsample",
+      "n_jobs": 4
+    },
+    "xgb": {
+      "name": "xgb",
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.5,
+      "tree_method": "hist",
+      "n_jobs": 4
+    },
+    "logreg_C0.1": {
+      "name": "logreg",
+      "C": 0.1,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "logreg_C100": {
+      "name": "logreg",
+      "C": 100,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    }
+  },
+  "model_defaults_pinned": {
+    "logreg": {
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "svm": {
+      "C": 1.0,
+      "loss": "squared_hinge",
+      "class_weight": "balanced",
+      "max_iter": 20000
+    },
+    "rf": {
+      "n_estimators": 500,
+      "max_features": "sqrt",
+      "min_samples_leaf": 1,
+      "class_weight": "balanced_subsample",
+      "n_jobs": 4
+    },
+    "xgb": {
+      "n_estimators": 300,
+      "max_depth": 3,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample_bytree": 0.5,
+      "tree_method": "hist",
+      "n_jobs": 4
+    }
+  },
+  "explainers": {
+    "coef": "|coef| on z-scored genes (LR, SVM)",
+    "shap": "mean |SHAP| over training-fold samples (Linear/Tree)",
+    "perm": "exact permutation importance, training fold, class-balanced Brier, R=10 (D12b)",
+    "ttest": "|Welch t|, training fold only"
+  },
+  "top_k": [
+    10,
+    25,
+    50
+  ],
+  "headline_k": 25,
+  "positive_only_rule": "D13b",
+  "stability": {
+    "primary": "Nogueira Phi (JMLR 2018 Def. 4)",
+    "secondary": [
+      "Kuncheva (constant size only)",
+      "Jaccard"
+    ],
+    "d": 20848,
+    "unit": "one 5-fold CV repeat",
+    "dimensions": [
+      "resampling",
+      "model",
+      "explainer",
+      "combined",
+      "baseline",
+      "sensitivity"
+    ]
+  },
+  "consensus": {
+    "rule": "within-pipeline selection frequency >= 0.5 at k=25 in >= ceil(n_primary/2) primary pipelines",
+    "n_primary_pipelines": 10,
+    "lists": {
+      "S_cons": 1,
+      "S_top25": 25,
+      "S_top50": 50
+    },
+    "frozen_lists": {
+      "S_cons": [
+        "DKFZp779M0652"
+      ],
+      "S_top25": [
+        "DKFZp779M0652",
+        "ABHD1",
+        "LYVE1",
+        "MMP28",
+        "DMGDH",
+        "FLVCR1",
+        "NIPSNAP3B",
+        "RAE1",
+        "HSPB6",
+        "LOC102723493",
+        "LOC284825",
+        "PQLC2L",
+        "ZNRF2P1",
+        "ABCD2",
+        "CELSR1",
+        "SLC7A10",
+        "LOC101927420",
+        "STX11",
+        "DCAF12L2",
+        "ALPI",
+        "PNMA2",
+        "PAFAH1B3",
+        "TET3",
+        "CCDC85C",
+        "ANKRD10-IT1"
+      ],
+      "S_top50": [
+        "MMP28",
+        "DKFZp779M0652",
+        "ABHD1",
+        "DMGDH",
+        "LYVE1",
+        "NIPSNAP3B",
+        "HSPB6",
+        "LOC284825",
+        "LOC102723493",
+        "FLVCR1",
+        "PQLC2L",
+        "ABCD2",
+        "RAE1",
+        "STX11",
+        "SLC7A10",
+        "LOC101927420",
+        "C11orf70",
+        "CCDC178",
+        "CELSR1",
+        "ANKRD10-IT1",
+        "ZNRF2P1",
+        "ACADL",
+        "INHBA",
+        "PFKFB1",
+        "DCAF12L2",
+        "APOB",
+        "TET3",
+        "TMOD1",
+        "PRKCZ",
+        "CCDC85C",
+        "DENND2A",
+        "PALM",
+        "SDC1",
+        "PNMA2",
+        "PAFAH1B3",
+        "ALPI",
+        "MYO16",
+        "HSPB7",
+        "NAALAD2",
+        "C22orf39",
+        "DNMT1",
+        "PAQR4",
+        "C8orf34",
+        "LRRC15",
+        "EPB42",
+        "STIL",
+        "TREM2",
+        "C15orf48",
+        "CIDEA",
+        "ADH1C"
+      ]
+    }
+  },
+  "external_endpoints": "docs/methodology_decisions.md Addendum A4 (aligned effect r_g, C1, C2, signature score, frozen LR; bootstrap over external samples)",
+  "frozen_genes_file": "results/freeze/frozen_genes.csv",
+  "frozen_genes_sha256": "3509ba49148185d9e7a7843d7a8f86f6b8543ed1b45c687d4a2f721685aec00e",
+  "references": {
+    "observed_vs_null": {
+      "path": "results/matrix/20260921T210020Z_full_matrix_5367d04d/analysis/observed_vs_null.csv",
+      "sha256": "d14d8511e82b92b5abdc20b5b0df5fd06b0d35b51946f9802905df1a7936ea23"
+    },
+    "null_repeat_level": {
+      "path": "results/matrix/20260921T210020Z_full_matrix_5367d04d/analysis/null_repeat_level_stability.csv",
+      "sha256": "78732b317c780893d3f2c4764a8f988367ca96099adf67083846b5d9acd88523"
+    },
+    "sensitivity_summary": {
+      "path": "results/sensitivity_summary.json",
+      "sha256": "2dc65acf625a294574242f513b9bd0c106f3c3a154e8ed7e11b1109580e33b3a"
+    },
+    "null_replicates": 30
+  },
+  "rules_after_freeze": [
+    "no tuning, gene, k, threshold, preprocessing or endpoint change using GSE65194",
+    "external results are reported whether or not favourable"
+  ]
+}
