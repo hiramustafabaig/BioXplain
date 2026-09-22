@@ -1,0 +1,33 @@
+{
+  "sens_collapse_var": {
+    "top25_overlap": 19,
+    "top25_jaccard": 0.6129032258064516,
+    "spearman_universe_selection_frequency": 0.36161961482978505,
+    "mean_abs_phi_change_k25": 0.0348701423957623,
+    "n_genes": 20848,
+    "consensus_genes": 1,
+    "git_commit": "00d3bc64",
+    "dirty": false
+  },
+  "sens_filter_025": {
+    "top25_overlap": 21,
+    "top25_jaccard": 0.7241379310344828,
+    "spearman_universe_selection_frequency": 0.42660764840891624,
+    "mean_abs_phi_change_k25": 0.026476724483538557,
+    "n_genes": 20848,
+    "consensus_genes": 1,
+    "git_commit": "00d3bc64",
+    "dirty": false
+  },
+  "sens_filter_100": {
+    "top25_overlap": 23,
+    "top25_jaccard": 0.8518518518518519,
+    "spearman_universe_selection_frequency": 0.40853598175324213,
+    "mean_abs_phi_change_k25": 0.032341888358514016,
+    "n_genes": 20848,
+    "consensus_genes": 3,
+    "git_commit": "00d3bc64",
+    "dirty": false
+  },
+  "reference_consensus_genes": 2
+}
