@@ -1,0 +1,4 @@
+foreground,library,n_foreground,n_background,n_terms_tested,n_adj_p_lt_0.05,min_adj_p
+S_top50,GO_Biological_Process_2023,34,12722,5229,0,0.693995534148022
+S_top50,Reactome_2022,21,9216,1758,0,1.0
+S_top50,MSigDB_Hallmark_2020,13,4177,50,0,0.5133601438202627

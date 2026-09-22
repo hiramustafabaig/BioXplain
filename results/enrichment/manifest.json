@@ -1,0 +1,50 @@
+{
+  "utc": "2026-09-22T19:41:22.605446+00:00",
+  "libraries": [
+    {
+      "library": "GO_Biological_Process_2023",
+      "downloaded_utc": "2026-09-22T19:41:14.353473+00:00",
+      "gseapy_version": "1.3.1",
+      "n_terms": 5406,
+      "sha256": "8d06db504c88023361006e6d84632c946c68de9cf734421396e087a11f378bad"
+    },
+    {
+      "library": "Reactome_2022",
+      "downloaded_utc": "2026-09-22T19:41:19.134422+00:00",
+      "gseapy_version": "1.3.1",
+      "n_terms": 1816,
+      "sha256": "65e6ee24a93b13c1c8dd30dd652d99748eb7764eedeb54d67beab4d9cf8942e3"
+    },
+    {
+      "library": "MSigDB_Hallmark_2020",
+      "downloaded_utc": "2026-09-22T19:41:22.551850+00:00",
+      "gseapy_version": "1.3.1",
+      "n_terms": 50,
+      "sha256": "f718f8464bdde48cd350ac3a0d67300d65d9e431d339da47d0640bea20224000"
+    }
+  ],
+  "background_definition": "frozen eligible gene universe intersected with library genes",
+  "min_term_size": 5,
+  "max_term_size": 500,
+  "correction": "Benjamini-Hochberg within library",
+  "git": {
+    "commit": "dd174cf431128ebcf36de000d76d7ab1c71b7c72",
+    "branch": "main",
+    "dirty": false
+  },
+  "software": {
+    "python": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.9.0",
+    "pyyaml": "6.0.3",
+    "shap": "0.51.0",
+    "xgboost": "3.2.0",
+    "gseapy": "1.3.1"
+  },
+  "foreground_lists": {
+    "S_top50": 50
+  }
+}
