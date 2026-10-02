@@ -4,7 +4,9 @@ An empirical study — and a tested, reproducible Python workflow — of how con
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white) ![Tests](https://img.shields.io/badge/tests-160%20passing-B9D175) ![Status](https://img.shields.io/badge/status-research%20portfolio-450C3F) ![Not peer reviewed](https://img.shields.io/badge/peer%20review-not%20peer%20reviewed-lightgrey)
 
-**Explore it:** the [showcase page](docs/index.html) (findings, pipeline and an in-page literature reader) · the written [literature review (PDF)](docs/research/BioXplain_Literature_Review.pdf), also as [Word](docs/research/BioXplain_Literature_Review.docx) · the [full report](docs/reports/final_report.md).
+**Live site: [hiramustafabaig.github.io/BioXplain](https://hiramustafabaig.github.io/BioXplain/)** (findings, pipeline and an in-page literature reader).
+
+**Explore it:** the [showcase page source](docs/index.html) · the written [literature review (PDF)](docs/research/BioXplain_Literature_Review.pdf), also as [Word](docs/research/BioXplain_Literature_Review.docx) · the [full report](docs/reports/final_report.md).
 
 **Full report:** [docs/reports/final_report.md](docs/reports/final_report.md). **Results tables/figures:** [docs/results/results_summary.md](docs/results/results_summary.md), `results/figures/`. **Methodology (22 pre-specified decisions, written before results):** [docs/methodology_decisions.md](docs/methodology_decisions.md). **Discovery freeze:** [docs/freeze/discovery_freeze.md](docs/freeze/discovery_freeze.md). **Limitations:** [docs/limitations.md](docs/limitations.md). **Reproduce it:** [docs/reproducibility.md](docs/reproducibility.md).
 
