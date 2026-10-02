@@ -4,7 +4,7 @@ An empirical study — and a tested, reproducible Python workflow — of how con
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white) ![Tests](https://img.shields.io/badge/tests-160%20passing-B9D175) ![Status](https://img.shields.io/badge/status-research%20portfolio-450C3F) ![Not peer reviewed](https://img.shields.io/badge/peer%20review-not%20peer%20reviewed-lightgrey)
 
-**Explore it:** the [showcase page](site/index.html) (findings, pipeline and an in-page literature reader) · the written [literature review (PDF)](docs/research/BioXplain_Literature_Review.pdf), also as [Word](docs/research/BioXplain_Literature_Review.docx) · the [full report](docs/reports/final_report.md).
+**Explore it:** the [showcase page](docs/index.html) (findings, pipeline and an in-page literature reader) · the written [literature review (PDF)](docs/research/BioXplain_Literature_Review.pdf), also as [Word](docs/research/BioXplain_Literature_Review.docx) · the [full report](docs/reports/final_report.md).
 
 **Full report:** [docs/reports/final_report.md](docs/reports/final_report.md). **Results tables/figures:** [docs/results/results_summary.md](docs/results/results_summary.md), `results/figures/`. **Methodology (22 pre-specified decisions, written before results):** [docs/methodology_decisions.md](docs/methodology_decisions.md). **Discovery freeze:** [docs/freeze/discovery_freeze.md](docs/freeze/discovery_freeze.md). **Limitations:** [docs/limitations.md](docs/limitations.md). **Reproduce it:** [docs/reproducibility.md](docs/reproducibility.md).
 
@@ -39,7 +39,7 @@ Both from NCBI GEO, GPL570 (Affymetrix HG-U133 Plus 2.0): **GSE42568** (discover
 | `tests/` | The pytest suite, including deliberate leakage tests |
 | `results/` | Saved result tables, rankings and figures that the report's numbers are read from |
 | `docs/` | Report, methodology decisions, discovery freeze, limitations, reproducibility notes and the literature review (`docs/research/`) |
-| `site/` | A standalone showcase web page (`site/index.html`) summarising what was done and found |
+| `docs/index.html` | The standalone showcase web page (served by GitHub Pages) summarising what was done and found |
 | `notebooks/` | Data exploration |
 
 ## Reproduce it
