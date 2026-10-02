@@ -41,3 +41,6 @@ notebooks/01_data_exploration.ipynb
 
 # per-fold resumable caches (regenerable); assembled CSVs are committed
 results/**/folds/
+
+# Private project drafts (not for publication)
+BioXplain_Research_Project_Draft*.docx

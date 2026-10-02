@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "BioXplain: an empirical study of explanation stability and cross-cohort replication in breast-tissue gene expression"
+type: software
+authors:
+  - family-names: Baig
+    given-names: Hira
+repository-code: "https://github.com/hiramustafabaig/BioXplain"
+abstract: "An empirical study and tested, reproducible Python workflow measuring how consistently machine-learning explanations identify gene-expression features across resampling, model and explainer, and whether that stability predicts replication in an independent breast-tissue cohort. A student research-portfolio project, not peer reviewed."
+keywords:
+  - explanation stability
+  - feature selection stability
+  - gene expression
+  - SHAP
+  - breast cancer
+  - reproducibility

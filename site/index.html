@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="BioXplain: an empirical study of whether a stable prediction means a stable reason in breast-tissue gene-expression classifiers. Findings, pipeline and literature review.">
+<meta name="theme-color" content="#450C3F">
+<title>BioXplain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+<style>
+/* DESIGN PLAN
+   Color  : the user's Color Hunt palette, used by role.
+            plum #450C3F = ground for hero / pipeline / literature / contact, and ink on light sections
+            cream #F5FBDA = ground for overview / findings / limits, and text on plum
+            lime #B9D175 = the one active accent on plum (CTAs, highlights, the consensus gene)
+            mint #D9EFBD = secondary fills (quiet cards, bands, pills)
+            Contrast: cream on plum 14:1, lime on plum 9:1, plum on lime 9:1, plum on cream 14:1.
+            Lime is never used as text on cream (fails contrast); on cream, plum is the accent.
+   Type   : Bricolage Grotesque (display) / Geist (text) / Geist Mono (data, labels)
+   Layout : alternating plum / cream sections with blurred colour fades between them;
+            each card family has its own surface and its own hover. */
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+@font-face{font-family:'GreekFix'; src:local('Segoe UI'),local('Helvetica Neue'),local('Arial'); unicode-range:U+0370-03FF}
+:root{
+  --plum:#450C3F; --plum-deep:#2B0727; --plum-2:#5A1F52;
+  --lime:#B9D175; --mint:#D9EFBD; --cream:#F5FBDA; --paper:#FCFEF0;
+  --display:'GreekFix','Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --sans:'GreekFix','Geist','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'GreekFix','Geist Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+  --ease:cubic-bezier(.2,.75,.2,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0; background:var(--plum); color:var(--cream); font-family:var(--sans); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+h1,h2,h3,h4,p,ul{margin:0}
+ul{padding:0; list-style:none}
+a{color:inherit}
+.mono{font-family:var(--mono)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ---------- section themes ---------- */
+.on-plum{--bg:var(--plum); --fg:var(--cream); --mute:color-mix(in srgb,var(--cream) 76%,var(--plum)); --line:color-mix(in srgb,var(--cream) 16%,transparent); --accent:var(--lime)}
+.on-cream{--bg:var(--cream); --fg:var(--plum); --mute:color-mix(in srgb,var(--plum) 76%,var(--cream)); --line:color-mix(in srgb,var(--plum) 16%,transparent); --accent:var(--plum)}
+.f1,.f3,.f5,.c-do,.l3,.cl-gh,.viz{--fg:var(--cream); --mute:color-mix(in srgb,var(--cream) 78%,var(--plum)); --line:color-mix(in srgb,var(--cream) 16%,transparent)}
+.sec{position:relative; background:var(--bg); color:var(--fg)}
+.sec>.wrap{position:relative; z-index:1}
+.sec.fade{padding-top:92px; padding-bottom:56px}
+.sec.fade::before{content:""; position:absolute; left:0; right:0; top:-1px; height:85px; pointer-events:none;
+  background:linear-gradient(to bottom,var(--prev),var(--bg));
+  background:linear-gradient(in oklab to bottom,var(--fadeStops))}
+.sec.fade::after{content:""; position:absolute; left:6%; right:6%; top:-26px; height:84px; pointer-events:none; filter:blur(26px); opacity:.85;
+  background:radial-gradient(48% 50% at 28% 50%,color-mix(in srgb,var(--lime) 62%,transparent),transparent 72%),radial-gradient(40% 50% at 74% 50%,color-mix(in srgb,var(--mint) 62%,transparent),transparent 72%)}
+.from-plum{--prev:var(--plum); --fadeStops:var(--plum) 0%,var(--lime) 58%,var(--cream) 100%}
+.from-cream{--prev:var(--cream); --fadeStops:var(--cream) 0%,var(--lime) 40%,var(--plum) 100%}
+.from-lime{--prev:var(--lime); --fadeStops:var(--lime) 0%,color-mix(in oklab,var(--lime) 40%,var(--plum)) 45%,var(--plum) 100%}
+
+.wrap{max-width:1160px; margin-inline:auto; padding-inline:clamp(16px,4vw,32px)}
+
+/* ---------- shared type + parts ---------- */
+.eyebrow{display:inline-flex; align-items:center; gap:9px; font:500 11.5px/1 var(--mono); letter-spacing:.09em; text-transform:uppercase; padding:8px 13px; border-radius:999px; border:1px solid var(--line); color:var(--fg); width:fit-content}
+.eyebrow b{display:inline-grid; place-items:center; min-width:22px; height:22px; border-radius:99px; background:var(--accent); color:var(--bg); font-weight:600; font-size:11px}
+.head{display:grid; grid-template-columns:1.15fr .85fr; gap:16px 48px; align-items:end; margin-bottom:32px}
+.head .eyebrow{grid-column:1/-1}
+h2{font-family:var(--display); font-weight:700; font-size:clamp(1.85rem,3.9vw,2.9rem); line-height:1.04; letter-spacing:-.028em; text-wrap:balance}
+.lede{color:var(--mute); font-size:clamp(.98rem,1.25vw,1.08rem); max-width:60ch}
+h3{font-family:var(--display); font-weight:650; letter-spacing:-.015em; line-height:1.15; text-wrap:balance}
+.card{position:relative; border-radius:20px; padding:24px}
+.tag{font:500 11px/1.35 var(--mono); letter-spacing:.09em; text-transform:uppercase}
+.pill{display:inline-flex; align-items:center; gap:6px; font:500 11.5px/1 var(--mono); padding:6px 10px; border-radius:99px}
+.ico{width:18px; height:18px; flex:none; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; height:46px; padding:0 20px; border-radius:999px; font:600 14px/1 var(--sans); border:1px solid transparent; cursor:pointer; position:relative; overflow:hidden; text-decoration:none; white-space:nowrap; transition:transform .25s var(--ease),background .25s,border-color .25s}
+.btn .arr{display:inline-block; transition:transform .25s var(--ease)}
+.btn:hover .arr{transform:translateX(5px)}
+.btn.primary{background:var(--accent); color:var(--bg)}
+.btn.primary::after{content:""; position:absolute; inset:0; background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%); transform:translateX(-130%); transition:transform .7s var(--ease)}
+.btn.primary:hover::after{transform:translateX(130%)}
+.btn.primary:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent; color:var(--fg); border-color:color-mix(in srgb,var(--fg) 38%,transparent)}
+.btn.ghost:hover{background:color-mix(in srgb,var(--fg) 10%,transparent); border-color:var(--fg)}
+.btn:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--lime); outline-offset:3px}
+.on-cream .btn:focus-visible,.on-cream a:focus-visible{outline-color:var(--plum)}
+
+/* shining border (rotating conic arc) */
+.shine{isolation:isolate}
+.shine::before{content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; pointer-events:none; z-index:3;
+  background:conic-gradient(from var(--ang),transparent 0 60%,var(--s1,var(--lime)) 79%,var(--s2,var(--mint)) 88%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  animation:spin 7s linear infinite}
+@keyframes spin{to{--ang:360deg}}
+/* cursor spotlight */
+.spot::after{content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:0; transition:opacity .35s; z-index:0;
+  background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%),var(--spot,rgba(185,209,117,.2)),transparent 62%)}
+.spot:hover::after{opacity:1}
+.spot>*{position:relative; z-index:1}
+
+.reveal{translate:0 20px; transition:translate .75s var(--ease)}
+.reveal.in{translate:0 0}
+
+/* ---------- nav ---------- */
+.nav{position:fixed; top:calc(env(safe-area-inset-top,0px) + 12px); left:12px; right:12px; margin-inline:auto; max-width:1100px; z-index:60; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 8px 8px 18px; border-radius:999px; color:var(--cream);
+  background:color-mix(in srgb,var(--plum) 80%,transparent); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3); border:1px solid color-mix(in srgb,var(--cream) 18%,transparent); box-shadow:0 10px 30px -12px rgba(43,7,39,.6)}
+.brand{display:flex; align-items:center; gap:10px; font:700 17px/1 var(--display); letter-spacing:-.02em; text-decoration:none}
+.brand svg{width:26px; height:26px}
+.nav-links{display:flex; gap:4px}
+.nav-links a{font-size:13.5px; font-weight:500; text-decoration:none; padding:9px 13px; border-radius:99px; color:color-mix(in srgb,var(--cream) 82%,var(--plum)); transition:background .2s,color .2s}
+.nav-links a:hover{background:color-mix(in srgb,var(--cream) 12%,transparent); color:var(--cream)}
+.nav .btn{height:40px; padding:0 16px; font-size:13px}
+
+/* ---------- hero ---------- */
+.hero{padding:112px 0 0; overflow:hidden}
+.hero::before{content:""; position:absolute; right:-12%; top:-18%; width:62%; aspect-ratio:1; pointer-events:none; filter:blur(60px); opacity:.55;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--lime) 36%,transparent),transparent)}
+.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center}
+.kick{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px}
+.kick .pill{background:color-mix(in srgb,var(--cream) 8%,transparent); border:1px solid var(--line); color:var(--cream)}
+.kick .pill b{color:var(--lime); font-weight:500}
+h1{font-family:var(--display); font-weight:700; font-size:clamp(2.5rem,5.6vw,4.5rem); line-height:1; letter-spacing:-.035em; text-wrap:balance}
+h1 em{font-style:normal; color:var(--lime); position:relative; white-space:nowrap}
+h1 em svg{position:absolute; left:0; bottom:-.16em; width:100%; height:.28em; overflow:visible}
+h1 em path{stroke:var(--lime); stroke-width:3.5; fill:none; stroke-linecap:round; stroke-dasharray:260; stroke-dashoffset:260; animation:draw 1.2s .5s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hero-sub{margin-top:22px; max-width:52ch; color:var(--mute); font-size:clamp(1rem,1.3vw,1.1rem)}
+.cta{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px}
+.viz{background:var(--plum-deep); border:1px solid var(--line); padding:18px 18px 16px; --s1:var(--lime); --s2:var(--mint)}
+.viz-top{display:flex; justify-content:space-between; align-items:center; gap:10px; font:500 10.5px/1 var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--mute); margin-bottom:6px}
+.live{display:inline-flex; align-items:center; gap:7px; color:var(--lime)}
+.live i{width:7px; height:7px; border-radius:50%; background:var(--lime); animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(185,209,117,.6)}100%{box-shadow:0 0 0 9px rgba(185,209,117,0)}}
+#rankCanvas{display:block; width:100%; height:300px}
+.viz-foot{display:grid; grid-template-columns:1fr 1fr; gap:14px; padding-top:12px; border-top:1px solid var(--line)}
+.vf .k{display:block; font:500 10.5px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mute)}
+.vf .v{display:block; margin-top:7px; font:600 15px/1.1 var(--display)}
+.vf .v b{color:var(--lime); font-weight:700}
+.meter{height:5px; border-radius:9px; background:color-mix(in srgb,var(--cream) 14%,transparent); margin-top:8px; overflow:hidden}
+.meter i{display:block; height:100%; width:30%; border-radius:inherit; background:var(--lime); transition:width .9s var(--ease)}
+.flatline{margin-top:8px; height:5px; border-radius:9px; background:var(--mint); opacity:.9}
+.viz-note{font-size:12px; color:var(--mute); margin-top:12px; line-height:1.45}
+.stats{display:grid; grid-template-columns:repeat(4,1fr); margin-top:44px; border:1px solid var(--line); border-radius:18px; background:color-mix(in srgb,var(--cream) 5%,transparent); overflow:hidden}
+.stat{padding:18px 20px; border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat .n{font:700 clamp(1.7rem,3vw,2.3rem)/1 var(--display); letter-spacing:-.03em; color:var(--lime)}
+.stat .l{margin-top:8px; font-size:12.5px; color:var(--mute); line-height:1.4}
+.hero-end{height:36px}
+
+/* ---------- 01 overview ---------- */
+.trio{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.trio .card{display:flex; flex-direction:column; gap:14px}
+.trio h3{font-size:1.45rem}
+.trio li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px; line-height:1.5}
+.trio li .ico{margin-top:3px; width:16px; height:16px}
+.trio ul{display:grid; gap:11px}
+.c-do{background:var(--plum); color:var(--cream); --spot:rgba(185,209,117,.22)}
+.c-do .tag{color:var(--lime)}
+.c-do li .ico{color:var(--lime)}
+.c-do li{color:color-mix(in srgb,var(--cream) 92%,var(--plum))}
+.c-find{background:var(--lime); color:var(--plum); overflow:hidden; transition:transform .35s var(--ease),box-shadow .35s}
+.c-find::after{content:""; position:absolute; inset:0; background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%); transform:translateX(-130%); transition:transform .9s var(--ease); pointer-events:none}
+.c-find:hover{transform:translateY(-6px); box-shadow:0 22px 40px -22px rgba(69,12,63,.6)}
+.c-find:hover::after{transform:translateX(130%)}
+.c-find li{transition:transform .3s var(--ease)}
+.c-find:hover li:nth-child(1){transform:translateX(4px)} .c-find:hover li:nth-child(2){transform:translateX(7px)} .c-find:hover li:nth-child(3){transform:translateX(10px)} .c-find:hover li:nth-child(4){transform:translateX(13px)}
+.c-find .tag{color:var(--plum)}
+.c-new{background:var(--paper); border:1px solid color-mix(in srgb,var(--plum) 14%,transparent); box-shadow:0 1px 0 #fff inset,0 18px 40px -26px rgba(69,12,63,.45),0 2px 6px rgba(69,12,63,.06); overflow:hidden;
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition:transform .25s ease-out,box-shadow .35s}
+.c-new::before{content:""; position:absolute; right:-70px; top:-70px; width:210px; height:210px; border-radius:50%; background:radial-gradient(closest-side,var(--lime),transparent); opacity:.55; filter:blur(8px); transition:transform .6s var(--ease),opacity .4s}
+.c-new:hover{box-shadow:0 1px 0 #fff inset,0 34px 60px -28px rgba(69,12,63,.55)}
+.c-new:hover::before{transform:scale(1.35); opacity:.85}
+.c-new>*{position:relative}
+.c-new .tag{color:var(--plum)}
+.c-new .tag i,.c-find .tag i,.c-do .tag i{font-style:normal; display:inline-block; width:7px; height:7px; border-radius:50%; background:currentColor; margin-right:8px}
+.gap-row{display:grid; grid-template-columns:.9fr 1.1fr; gap:16px; margin-top:16px}
+.quote{background:var(--mint); color:var(--plum); display:flex; flex-direction:column; justify-content:space-between; gap:18px; transition:transform .3s var(--ease),box-shadow .3s}
+.quote:hover{transform:translate(-5px,-5px); box-shadow:9px 9px 0 var(--plum)}
+.quote .qm{font:800 4.4rem/.6 var(--display); color:color-mix(in srgb,var(--plum) 28%,transparent); height:30px}
+.quote blockquote{margin:0; font:500 clamp(1.08rem,1.7vw,1.38rem)/1.4 var(--display); letter-spacing:-.012em}
+.quote footer{font:500 11.5px/1.5 var(--mono); color:color-mix(in srgb,var(--plum) 82%,var(--mint)); letter-spacing:.02em}
+.vtable{background:var(--paper); border:1px solid color-mix(in srgb,var(--plum) 14%,transparent); box-shadow:0 18px 40px -30px rgba(69,12,63,.5); padding:0; overflow:hidden; display:flex; flex-direction:column}
+.vt-head{display:flex; justify-content:space-between; gap:10px; padding:16px 20px; font:500 11px/1 var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--mute)}
+.vrow{position:relative; display:grid; grid-template-columns:1fr auto; gap:6px 14px; padding:14px 20px; border-top:1px solid var(--line); transition:background .25s,padding-left .3s var(--ease)}
+.vrow::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--plum); transform:scaleY(0); transition:transform .3s var(--ease)}
+.vrow:hover{background:color-mix(in srgb,var(--lime) 28%,var(--paper)); padding-left:26px}
+.vrow:hover::before{transform:scaleY(1)}
+.vrow .claim{font-weight:500; font-size:14.5px; line-height:1.4}
+.vrow .why{grid-column:1/-1; font-size:12.5px; color:var(--mute); line-height:1.4}
+.vb{align-self:start; font:600 10.5px/1 var(--mono); letter-spacing:.05em; text-transform:uppercase; padding:6px 9px; border-radius:99px; display:inline-flex; gap:5px; align-items:center; white-space:nowrap}
+.vb.no{background:var(--plum); color:var(--cream)}
+.vb.part{background:var(--lime); color:var(--plum)}
+.vt-foot{margin-top:auto; padding:14px 20px; border-top:1px solid var(--line); background:color-mix(in srgb,var(--mint) 55%,var(--paper))}
+.linkbtn{background:none; border:0; padding:0; font:600 13.5px/1 var(--sans); color:var(--plum); cursor:pointer; display:inline-flex; gap:8px; align-items:center}
+.linkbtn .arr{transition:transform .25s var(--ease)}
+.linkbtn:hover .arr{transform:translateX(5px)}
+.linkbtn span.u{background:linear-gradient(currentColor,currentColor) 0 100%/100% 1.5px no-repeat; padding-bottom:3px; transition:background-size .3s}
+.linkbtn:hover span.u{background-size:0 1.5px}
+
+/* ---------- 02 pipeline ---------- */
+.flow{position:relative; display:grid; grid-template-columns:1fr; gap:20px}
+.flow-svg{position:absolute; left:0; top:0; pointer-events:none; overflow:visible; z-index:0}
+.node{position:relative; z-index:1; border-radius:20px; padding:20px 20px 18px; background:color-mix(in srgb,var(--cream) 6%,var(--plum)); border:1px solid var(--line);
+  translate:0 18px; transition:translate .7s var(--ease),transform .35s var(--ease),background .3s,box-shadow .35s; transition-delay:var(--d,0s),0s,0s,0s}
+.flow.in .node{translate:0 0}
+.node:hover{transform:translateY(-6px); transition-delay:0s; background:color-mix(in srgb,var(--cream) 10%,var(--plum)); box-shadow:0 26px 44px -24px rgba(0,0,0,.65),0 0 0 1px color-mix(in srgb,var(--c) 40%,transparent)}
+.node::before{content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; pointer-events:none; opacity:0; transition:opacity .35s;
+  background:conic-gradient(from var(--ang),transparent 0 55%,var(--c) 80%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0); animation:spin 4s linear infinite}
+.node:hover::before{opacity:1}
+.n-top{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
+.badge{display:grid; place-items:center; width:36px; height:36px; border-radius:50%; border:1.5px solid var(--c); color:var(--c); font:600 12.5px/1 var(--mono); transition:background .3s,color .3s,transform .4s var(--ease)}
+.node:hover .badge{background:var(--c); color:var(--plum); transform:rotate(-8deg) scale(1.08)}
+.stage{font:500 11px/1 var(--mono); letter-spacing:.1em; color:var(--c)}
+.node h3{font-size:1.2rem}
+.node p{margin-top:8px; font-size:14px; color:var(--mute); line-height:1.5}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:14px}
+.chips span{font:500 11px/1 var(--mono); padding:6px 9px; border-radius:99px; border:1px solid color-mix(in srgb,var(--c) 45%,transparent); color:var(--cream); transition:background .25s,color .25s,transform .3s var(--ease)}
+.node:hover .chips span{background:color-mix(in srgb,var(--c) 22%,transparent); transform:translateY(-2px)}
+.node:hover .chips span:nth-child(2){transition-delay:.04s} .node:hover .chips span:nth-child(3){transition-delay:.08s} .node:hover .chips span:nth-child(4){transition-delay:.12s}
+.e-base{fill:none; stroke:color-mix(in srgb,var(--cream) 20%,transparent); stroke-width:1.5; stroke-dasharray:3 6}
+.e-draw{fill:none; stroke:var(--lime); stroke-width:2.2; stroke-linecap:round; filter:drop-shadow(0 0 5px rgba(185,209,117,.7)); transition:stroke-dashoffset .8s var(--ease); transition-delay:var(--d,0s)}
+.e-pkt{fill:none; stroke:var(--cream); stroke-width:3.2; stroke-linecap:round; opacity:0; filter:drop-shadow(0 0 6px var(--mint))}
+.flow.running .e-pkt{animation:pkt 11.2s linear infinite; animation-delay:calc(var(--k)*1.4s)}
+@keyframes pkt{0%{stroke-dashoffset:12; opacity:1}12.5%{stroke-dashoffset:calc(var(--len)*-1); opacity:1}13%,100%{stroke-dashoffset:calc(var(--len)*-1); opacity:0}}
+.e-draw.hot{stroke-width:3.4; stroke:var(--mint)}
+.port{fill:var(--lime); opacity:0; transition:opacity .4s; transition-delay:var(--d,0s)}
+.flow.in .port{opacity:1}
+.flow-hint{margin-top:22px; font:500 12px/1.4 var(--mono); color:var(--mute); letter-spacing:.04em}
+
+/* ---------- 03 findings ---------- */
+.bento{display:grid; grid-template-columns:repeat(6,1fr); gap:16px}
+.f1{grid-column:span 4} .f2{grid-column:span 2} .f3{grid-column:span 2} .f4{grid-column:span 4} .f5{grid-column:span 4} .f6{grid-column:span 2}
+.bento .card{display:flex; flex-direction:column; gap:12px; min-width:0}
+.bento h3{font-size:clamp(1.15rem,1.9vw,1.5rem)}
+.bento p{font-size:14.5px; line-height:1.55}
+.tagrow{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; justify-content:space-between}
+.f1,.f5{background:var(--plum); color:var(--cream)}
+.f1 p,.f5 p{color:var(--mute)}
+.f1 .tag,.f5 .tag{color:var(--lime)}
+.f1 .tagrow .t2,.f5 .tagrow .t2{font:500 11.5px/1 var(--mono); color:var(--mute)}
+.bars{display:grid; gap:14px; margin-top:auto; padding-top:6px}
+.brow{display:grid; grid-template-columns:minmax(120px,190px) 1fr 76px; gap:6px 14px; align-items:center}
+.blabel{font:500 12px/1.3 var(--mono); color:var(--cream)}
+.btrack{position:relative; height:12px; border-radius:99px; background:color-mix(in srgb,var(--cream) 12%,transparent); overflow:hidden}
+.bfill{position:absolute; left:0; top:0; bottom:0; width:var(--w); border-radius:inherit; background:var(--lime)}
+@keyframes fillw{from{width:0}}
+.bfill.mint{background:var(--mint)}
+.bfill.hatch{background:repeating-linear-gradient(135deg,var(--cream) 0 3px,transparent 3px 7px); box-shadow:inset 0 0 0 1.5px var(--cream)}
+.in .bfill{animation:fillw 1.1s var(--ease) .15s both}
+.bval{font:600 13px/1 var(--mono); text-align:right; color:var(--cream)}
+.axis{display:grid; grid-template-columns:minmax(120px,190px) 1fr 76px; gap:14px; margin-top:-4px}
+.axis div{position:relative; height:14px; font:500 10.5px/1 var(--mono); color:var(--mute)}
+.axis span{position:absolute; top:0; transform:translateX(-50%)}
+.axis span:first-child{transform:none} .axis span:last-child{transform:translateX(-100%)}
+
+.f2{background:var(--lime); color:var(--plum); overflow:hidden; justify-content:space-between}
+.f2 .tag{color:var(--plum)}
+.dots{position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle,color-mix(in srgb,var(--plum) 34%,transparent) 1.3px,transparent 1.8px); background-size:13px 13px; -webkit-mask-image:radial-gradient(circle at 100% 0%,#000 0,transparent 68%); mask-image:radial-gradient(circle at 100% 0%,#000 0,transparent 68%); transition:transform .7s var(--ease)}
+.f2:hover .dots{transform:scale(1.08) rotate(-1.5deg)}
+.one{position:absolute; right:41px; top:36px; width:12px; height:12px; border-radius:50%; background:var(--plum); box-shadow:0 0 0 0 rgba(69,12,63,.5); animation:ping 2.2s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(69,12,63,.45)}100%{box-shadow:0 0 0 22px rgba(69,12,63,0)}}
+.big{font:800 clamp(4.4rem,9vw,6.6rem)/.9 var(--display); letter-spacing:-.05em; display:flex; align-items:baseline; gap:10px; position:relative}
+.big small{font:600 1.35rem/1 var(--display); letter-spacing:-.02em}
+.gene{display:inline-block; font:600 12px/1 var(--mono); background:var(--plum); color:var(--lime); padding:7px 10px; border-radius:8px; width:fit-content; position:relative}
+.f2 p{position:relative; max-width:30ch}
+
+.f3{background:var(--plum-deep); color:var(--cream); padding:0; overflow:hidden; border:1px solid var(--line); --s1:var(--mint); --s2:var(--lime)}
+.f3:hover{border-color:color-mix(in srgb,var(--lime) 50%,transparent)}
+.tbar{display:flex; align-items:center; gap:7px; padding:12px 16px; border-bottom:1px solid var(--line); font:500 11px/1 var(--mono); color:var(--mute)}
+.tbar i{width:9px; height:9px; border-radius:50%}
+.tbar i:nth-child(1){background:var(--lime)} .tbar i:nth-child(2){background:var(--mint)} .tbar i:nth-child(3){background:var(--cream)}
+.tbar span{margin-left:8px}
+.tag3{padding:16px 16px 0}
+.tag3 .tag{color:var(--lime)}
+.tbody{padding:12px 8px 18px; font:500 13px/1 var(--mono)}
+.tl{padding:9px 8px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; transition:background .2s,transform .3s var(--ease); color:var(--cream)}
+.tl:hover{background:color-mix(in srgb,var(--lime) 16%,transparent); transform:translateX(5px)}
+.tl .p{color:var(--lime)}
+.tl b{font-weight:600}
+.tl b.ok{color:var(--lime)}
+.tl b.lo{color:var(--plum-deep); background:var(--cream); padding:3px 7px; border-radius:6px}
+.tl em{font-style:normal; color:var(--mute)}
+.tl.dim{color:var(--mute)}
+.cursor{display:inline-block; width:8px; height:15px; background:var(--lime); margin-left:3px; vertical-align:-3px; animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.f4{background:var(--paper); color:var(--plum); border:1px solid color-mix(in srgb,var(--plum) 14%,transparent); box-shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(69,12,63,.5),0 2px 6px rgba(69,12,63,.06); transition:transform .35s var(--ease),box-shadow .35s}
+.f4:hover{transform:translateY(-7px); box-shadow:0 1px 0 #fff inset,0 36px 60px -30px rgba(69,12,63,.55),0 2px 6px rgba(69,12,63,.06)}
+.f4 .tag{color:var(--plum)}
+.f4 p{color:var(--mute)}
+.rng{display:grid; gap:12px; margin-top:6px}
+.rrow{display:grid; grid-template-columns:minmax(110px,170px) 1fr 92px; gap:6px 14px; align-items:center}
+.rl{font:500 12px/1.3 var(--mono)}
+.rt{position:relative; height:22px}
+.rt::before{content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:color-mix(in srgb,var(--plum) 22%,transparent)}
+.nullb{position:absolute; top:3px; bottom:3px; border-radius:6px; background:var(--mint); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--plum) 45%,transparent); transform-origin:left}
+.f4:hover .nullb{animation:grow .8s var(--ease)}
+@keyframes grow{from{transform:scaleX(.55); opacity:.4}to{transform:none; opacity:1}}
+.obs{position:absolute; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:var(--plum); box-shadow:0 0 0 3px var(--paper)}
+.obs.below{background:var(--paper); box-shadow:0 0 0 2px var(--plum),0 0 0 5px var(--paper)}
+.rs{font:600 11px/1 var(--mono); text-align:right; display:inline-flex; align-items:center; gap:5px; justify-content:flex-end}
+.rs .ico{width:13px; height:13px}
+.rax{display:grid; grid-template-columns:minmax(110px,170px) 1fr 92px; gap:14px; margin-top:-2px}
+.rax div{position:relative; height:14px; font:500 10.5px/1 var(--mono); color:var(--mute)}
+.rax span{position:absolute; top:0; transform:translateX(-50%)}
+.rax span:first-child{transform:none}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; font:500 11.5px/1.2 var(--mono); color:var(--mute)}
+.legend i{display:inline-block; vertical-align:-3px; margin-right:6px}
+.lg-b{width:20px; height:12px; border-radius:4px; background:var(--mint); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--plum) 45%,transparent)}
+.lg-o{width:11px; height:11px; border-radius:50%; background:var(--plum)}
+.lg-h{width:11px; height:11px; border-radius:50%; box-shadow:inset 0 0 0 2px var(--plum)}
+
+.f5{overflow:hidden; transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)); transition:transform .25s ease-out}
+.f5::after{content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(115deg,transparent 38%,rgba(217,239,189,.2) 50%,transparent 62%); transform:translateX(-130%); transition:transform 1s var(--ease); z-index:2}
+.f5:hover::after{transform:translateX(130%)}
+.f5 .tag{color:var(--mint)}
+.dumb{display:grid; gap:18px; margin-top:auto; padding-top:6px}
+.drow{display:grid; grid-template-columns:minmax(92px,120px) 1fr; gap:6px 14px; align-items:center}
+.dtrack{position:relative; height:24px}
+.dtrack::before{content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:color-mix(in srgb,var(--cream) 24%,transparent)}
+.dseg{position:absolute; top:50%; height:4px; margin-top:-2px; border-radius:4px; background:repeating-linear-gradient(135deg,var(--cream) 0 3px,transparent 3px 6px)}
+.dpt{position:absolute; top:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; transition:transform .3s var(--ease)}
+.dpt.a{background:var(--lime)}
+.dpt.b{background:var(--plum); box-shadow:inset 0 0 0 2.5px var(--cream)}
+.f5:hover .dpt.b{transform:translateX(-6px)}
+.dlab{font:500 12px/1.3 var(--mono); color:var(--cream)}
+.dval{grid-column:2; font:600 12.5px/1 var(--mono); color:var(--lime); margin-top:-2px}
+.dax{display:grid; grid-template-columns:minmax(92px,120px) 1fr; gap:14px; margin-top:-8px}
+.dax div{position:relative; height:14px; font:500 10.5px/1 var(--mono); color:var(--mute)}
+.dax span{position:absolute; top:0; transform:translateX(-50%)}
+.dax span:first-child{transform:none} .dax span:last-child{transform:translateX(-100%)}
+.dleg{display:flex; flex-wrap:wrap; gap:6px 16px; font:500 11.5px/1.2 var(--mono); color:var(--mute)}
+.dleg i{display:inline-block; width:11px; height:11px; border-radius:50%; vertical-align:-2px; margin-right:6px}
+
+.f6{background:var(--mint); color:var(--plum); border:1.5px dashed color-mix(in srgb,var(--plum) 55%,transparent); overflow:hidden; justify-content:space-between; transition:color .4s,border-color .4s}
+.f6::before{content:""; position:absolute; inset:0; background:var(--plum); transform:scaleY(0); transform-origin:bottom; transition:transform .5s var(--ease); z-index:0}
+.f6>*{position:relative; z-index:1}
+.f6:hover{color:var(--cream); border-color:var(--plum)}
+.f6:hover::before{transform:scaleY(1)}
+.f6 .tag{opacity:.95}
+.f6 .zero{font:800 clamp(3.2rem,6vw,4.4rem)/.9 var(--display); letter-spacing:-.04em}
+.f6 .zero small{font:500 .9rem/1.2 var(--mono); letter-spacing:0; display:block; margin-top:6px}
+.f6 p{max-width:34ch}
+.f6 .mono-note{font:500 11.5px/1.5 var(--mono)}
+
+/* ---------- rigor marquee ---------- */
+.band{position:relative; background:var(--lime); color:var(--plum); overflow:hidden; padding:20px 0 20px}
+.band.fade{padding-top:34px}
+.band::before{content:""; position:absolute; left:0; right:0; top:0; height:30px; pointer-events:none; background:linear-gradient(to bottom,var(--cream),var(--lime)); background:linear-gradient(in oklab to bottom,var(--cream),var(--lime))}
+.mq{display:flex; width:max-content; animation:mq 46s linear infinite}
+.band:hover .mq{animation-play-state:paused}
+.mq-set{display:flex; flex:none}
+.mq-item{display:flex; align-items:center; gap:14px; padding-right:34px; font:600 14px/1 var(--mono); white-space:nowrap; letter-spacing:-.01em}
+.mq-item::before{content:""; width:9px; height:9px; background:var(--plum); transform:rotate(45deg); flex:none}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- 05 literature ---------- */
+.lit{display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center}
+.lit h2{margin:14px 0 14px}
+.lit .cta{margin-top:22px}
+.counts{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+.cc{border-radius:18px; padding:18px 14px; min-height:132px; display:flex; flex-direction:column; justify-content:space-between; gap:18px; transition:transform .35s var(--ease),box-shadow .35s,border-color .3s}
+.cc .n{font:700 clamp(2.2rem,4.4vw,3.2rem)/1 var(--display); letter-spacing:-.04em}
+.cc .l{font-size:12.5px; line-height:1.35}
+.cc1{border:1px solid color-mix(in srgb,var(--cream) 34%,transparent); background:color-mix(in srgb,var(--cream) 5%,transparent)}
+.cc1 .n{color:var(--cream); background:linear-gradient(var(--lime),var(--lime)) 0 100%/0 3px no-repeat; width:fit-content; padding-bottom:6px; transition:background-size .5s var(--ease),color .3s}
+.cc1:hover{border-color:var(--lime); transform:translateY(-6px)}
+.cc1:hover .n{background-size:100% 3px; color:var(--lime)}
+.cc2{background:var(--lime); color:var(--plum)}
+.cc2:hover{transform:rotate(-3deg) scale(1.05); box-shadow:0 20px 34px -18px rgba(0,0,0,.6)}
+.cc3{background:var(--mint); color:var(--plum); background-image:radial-gradient(circle,color-mix(in srgb,var(--plum) 13%,transparent) 1.2px,transparent 1.7px); background-size:11px 11px}
+.cc3:hover{transform:translateY(-8px) rotate(2deg); box-shadow:0 20px 34px -18px rgba(0,0,0,.6)}
+
+/* ---------- 06 limits ---------- */
+.lim{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.lim .card{display:flex; flex-direction:column; gap:12px; padding:22px 20px; min-height:200px}
+.lim h3{font-size:1.12rem}
+.lim p{font-size:14px; line-height:1.5}
+.lim .ico{width:26px; height:26px; transition:transform .5s var(--ease)}
+.l1{background:var(--mint); color:var(--plum); transition:transform .3s var(--ease)}
+.l1:hover{transform:translateY(-6px)} .l1:hover .ico{transform:rotate(180deg)}
+.l2{background:var(--paper); border:1.5px dashed color-mix(in srgb,var(--plum) 45%,transparent); transition:border-color .3s,transform .3s var(--ease),box-shadow .3s}
+.l2:hover{border-style:solid; border-color:var(--plum); transform:translateY(-6px); box-shadow:0 20px 34px -22px rgba(69,12,63,.5)}
+.l2:hover .ico{transform:translateX(6px)}
+.l3{background:var(--plum); color:var(--cream)}
+.l3 .big2{font:800 2.6rem/1 var(--display); letter-spacing:-.04em; color:var(--lime); display:flex; gap:8px; align-items:baseline}
+.l3 .big2 small{font:500 .78rem/1 var(--mono); color:var(--mute); letter-spacing:0}
+.l3 p{color:var(--mute)}
+.l3:hover .big2{animation:wob .6s var(--ease)}
+@keyframes wob{30%{transform:scale(1.12) rotate(-2deg)}}
+.l4{border:1.5px solid var(--plum); background:repeating-linear-gradient(135deg,transparent 0 9px,color-mix(in srgb,var(--lime) 40%,transparent) 9px 11px); background-size:200% 200%; transition:background-position .8s linear}
+.l4:hover{background-position:60px 0}
+.l4>*{position:relative}
+.l4 .inner{background:var(--cream); margin:-4px; padding:4px; border-radius:8px}
+.l4:hover .ico{transform:scale(1.2)}
+
+/* ---------- contact + credits ---------- */
+.contact-h{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:26px}
+.contact-h h2{max-width:22ch}
+.links{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.clink{display:flex; flex-direction:column; justify-content:space-between; gap:26px; min-height:176px; padding:22px; border-radius:22px; text-decoration:none; position:relative; overflow:hidden; min-width:0}
+.clink .top{display:flex; justify-content:space-between; align-items:center}
+.clink .big-ico{width:34px; height:34px; fill:currentColor; stroke:none}
+.clink .lab{font:500 11px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase}
+.clink .handle{font:650 clamp(1rem,1.5vw,1.2rem)/1.2 var(--display); letter-spacing:-.01em; overflow-wrap:anywhere}
+.clink .go{display:grid; place-items:center; width:38px; height:38px; border-radius:50%; border:1px solid currentColor; transition:transform .35s var(--ease),background .3s,color .3s}
+.clink:hover .go{transform:rotate(-45deg)}
+.cl-mail{background:var(--lime); color:var(--plum)}
+.cl-mail::before{content:""; position:absolute; inset:0; background:var(--cream); transform:translateX(-101%); transition:transform .55s var(--ease)}
+.cl-mail:hover::before{transform:none}
+.cl-mail>*{position:relative}
+.cl-mail .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.cl-mail .btn{height:38px; padding:0 14px; font-size:13px}
+.cl-mail .btn.primary{background:var(--plum); color:var(--cream)}
+.cl-mail .btn.ghost{color:var(--plum); border-color:var(--plum)}
+.cl-gh{background:var(--plum-deep); color:var(--cream); border:1px solid var(--line); --s1:var(--lime); --s2:var(--cream); transition:transform .35s var(--ease)}
+.cl-gh:hover{transform:translateY(-6px)}
+.cl-gh .big-ico{transition:transform .6s var(--ease)}
+.cl-gh:hover .big-ico{transform:rotate(360deg)}
+.cl-gh::before{opacity:.35; transition:opacity .3s}
+.cl-gh:hover::before{opacity:1}
+.cl-in{background:var(--mint); color:var(--plum); transition:transform .35s var(--ease),box-shadow .35s}
+.cl-in:hover{transform:translate(-5px,-5px); box-shadow:9px 9px 0 var(--lime)}
+.cl-in:hover .big-ico{transform:scale(1.12)}
+.cl-in .big-ico{transition:transform .3s var(--ease)}
+.cl-gh .go,.cl-in .go{color:inherit}
+.toast{font:500 12px/1 var(--mono); opacity:0; transition:opacity .25s; margin-left:2px}
+.toast.on{opacity:1}
+.credits{display:grid; grid-template-columns:1fr 1.4fr; gap:28px; margin-top:44px; padding-top:30px; border-top:1px solid var(--line)}
+.credits h4{font:500 11px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--lime); margin-bottom:14px}
+.credits li{font-size:13.5px; line-height:1.5; color:var(--mute); margin-bottom:8px}
+.credits li b{color:var(--cream); font-weight:600}
+.byline{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+.avatar{width:44px; height:44px; border-radius:12px; background:var(--lime); color:var(--plum); display:grid; place-items:center; font:700 15px/1 var(--mono); flex:none}
+.byline .nm{font:650 1.15rem/1.1 var(--display)}
+.byline .rl2{font:500 11px/1 var(--mono); color:var(--mute); margin-top:5px}
+.credits p{font-size:13.5px; color:var(--mute); line-height:1.55; max-width:44ch}
+.swatches{display:flex; gap:6px; margin-top:4px}
+.swatches i{width:22px; height:22px; border-radius:7px; border:1px solid var(--line); display:block}
+.endline{display:flex; justify-content:space-between; gap:10px 24px; flex-wrap:wrap; margin-top:30px; padding-top:20px; border-top:1px solid var(--line); font:500 11px/1.5 var(--mono); color:var(--mute); letter-spacing:.03em}
+.contact{padding-bottom:30px}
+
+/* ---------- literature drawer (cream panel on plum scrim) ---------- */
+.scrim{position:fixed; inset:0; z-index:90; background:color-mix(in srgb,var(--plum-deep) 62%,transparent); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .3s}
+.scrim.open{opacity:1; pointer-events:auto}
+.drawer{position:fixed; top:0; right:0; bottom:0; width:min(780px,100%); z-index:100; background:var(--cream); color:var(--plum); display:flex; flex-direction:column; transform:translateX(102%); visibility:hidden; transition:transform .4s var(--ease),visibility 0s .4s; box-shadow:-30px 0 80px rgba(43,7,39,.5)}
+.drawer.open{transform:none; visibility:visible; transition:transform .4s var(--ease),visibility 0s 0s}
+.d-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 12px}
+.d-head h3{font-size:1.3rem}
+.d-close{width:40px; height:40px; border-radius:50%; border:1px solid color-mix(in srgb,var(--plum) 30%,transparent); background:transparent; color:var(--plum); display:grid; place-items:center; cursor:pointer; transition:background .2s,transform .3s var(--ease)}
+.d-close:hover{background:var(--plum); color:var(--cream); transform:rotate(90deg)}
+.d-tabs{display:flex; gap:6px; margin:0 20px 12px; padding:5px; border-radius:99px; background:var(--mint); width:fit-content; max-width:calc(100% - 40px); overflow-x:auto}
+.dtab{border:0; background:transparent; color:var(--plum); font:600 12.5px/1 var(--sans); padding:10px 14px; border-radius:99px; cursor:pointer; white-space:nowrap; transition:background .2s,color .2s}
+.dtab[aria-selected="true"]{background:var(--plum); color:var(--cream)}
+.d-body{flex:1; overflow-y:auto; padding:6px 20px calc(env(safe-area-inset-bottom,0px) + 28px); overscroll-behavior:contain}
+.dpanel{display:none}
+.dpanel.active{display:block}
+.d-intro{font-size:13.5px; line-height:1.55; color:color-mix(in srgb,var(--plum) 78%,var(--cream)); margin-bottom:14px}
+.li{background:var(--paper); border:1px solid color-mix(in srgb,var(--plum) 14%,transparent); border-radius:16px; padding:16px 16px 14px; margin-bottom:10px; transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+.li:hover{transform:translateY(-3px); border-color:var(--plum); box-shadow:0 14px 28px -20px rgba(69,12,63,.55)}
+.li-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start}
+.li h4{font:650 15px/1.3 var(--display); letter-spacing:-.01em}
+.li .meta{font:500 11px/1.2 var(--mono); color:color-mix(in srgb,var(--plum) 76%,var(--cream)); white-space:nowrap}
+.li .auth{font-size:12.5px; color:color-mix(in srgb,var(--plum) 76%,var(--cream)); margin-top:5px}
+.li .find{font-size:13.5px; line-height:1.5; margin-top:8px}
+.li .row{display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; margin-top:10px}
+.dp{font:600 10.5px/1 var(--mono); letter-spacing:.04em; text-transform:uppercase; padding:6px 9px; border-radius:99px; background:var(--mint); color:var(--plum)}
+.dp.hot{background:var(--plum); color:var(--lime)}
+.src{font:500 11.5px/1.2 var(--mono); color:var(--plum); text-decoration:none; background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat; padding-bottom:2px; overflow-wrap:anywhere}
+.src:hover{background-size:0 1px}
+.rrow2{display:grid; grid-template-columns:1fr auto; gap:4px 14px; padding:13px 0; border-top:1px solid var(--line)}
+.rrow2:first-of-type{border-top:0}
+.rrow2 .rn{font:600 13.5px/1.2 var(--mono)}
+.rrow2 .rd{grid-column:1; font-size:13px; color:color-mix(in srgb,var(--plum) 78%,var(--cream)); line-height:1.45}
+.rrow2 .rm{grid-column:2; grid-row:1/span 2; display:flex; flex-direction:column; align-items:flex-end; gap:5px; font:500 11px/1 var(--mono)}
+.rrow2 .rm span{background:var(--mint); padding:5px 8px; border-radius:99px; white-space:nowrap}
+.garow{padding:14px 0; border-top:1px solid var(--line); display:grid; gap:8px}
+.garow:first-of-type{border-top:0}
+.garow .as{font:600 14.5px/1.35 var(--display)}
+.garow .ev{font-size:12.5px; color:color-mix(in srgb,var(--plum) 78%,var(--cream)); line-height:1.45}
+
+/* ---------- written review (inside drawer) ---------- */
+.drawer{--bg:var(--cream); --fg:var(--plum); --accent:var(--plum); --mute:color-mix(in srgb,var(--plum) 78%,var(--cream)); --line:color-mix(in srgb,var(--plum) 16%,transparent)}
+.rv{font-size:15.5px; line-height:1.72; color:var(--plum)}
+.rv-title{font:700 clamp(1.4rem,3.4vw,1.75rem)/1.12 var(--display); letter-spacing:-.022em; text-wrap:balance; margin:2px 0 8px}
+.rv-meta{font:500 11.5px/1.5 var(--mono); color:var(--mute); letter-spacing:.02em}
+.rv-actions{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0 4px}
+.rv-actions .btn{height:38px; padding:0 15px; font-size:13px}
+.rv-toc{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px}
+.rv-toc a{font:500 11.5px/1 var(--mono); padding:7px 10px; border-radius:99px; background:var(--mint); color:var(--plum); text-decoration:none; transition:background .2s,color .2s}
+.rv-toc a:hover{background:var(--plum); color:var(--cream)}
+.rv h5{font:700 1.2rem/1.2 var(--display); letter-spacing:-.015em; margin:30px 0 10px; padding-top:22px; border-top:1px solid var(--line); text-wrap:balance; scroll-margin-top:6px}
+.rv h6{font:650 1.02rem/1.3 var(--display); letter-spacing:-.01em; margin:20px 0 6px}
+.rv p{margin:0 0 13px; text-wrap:pretty}
+.rv .sum{background:var(--plum); color:var(--cream); border-radius:16px; padding:16px 18px; margin:16px 0 0}
+.rv .sum b{color:var(--lime)}
+.rv .sum p{margin:0}
+.rv .scope{background:var(--mint); border-radius:14px; padding:14px 16px; margin:0 0 4px; font-size:14px; line-height:1.62}
+.rv .scope p{margin:0 0 9px} .rv .scope p:last-child{margin:0}
+.rv .dag{font-weight:600}
+.rv-tablewrap{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--line); border-radius:14px;
+  background:linear-gradient(to right,var(--paper) 30%,transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--paper) 30%,transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(69,12,63,.22),transparent) left/12px 100% no-repeat scroll,linear-gradient(to left,rgba(69,12,63,.22),transparent) right/12px 100% no-repeat scroll,var(--paper)}
+.rv-hint{display:none; font:500 11.5px/1.4 var(--mono); color:var(--mute); margin:0 0 10px}
+@media (max-width:760px){.rv-hint{display:block}}
+.rv-matrix{border-collapse:separate; border-spacing:0; width:100%; min-width:700px; font-size:12.5px; line-height:1.35}
+.rv-matrix caption{caption-side:top; text-align:left; font:600 12.5px/1.4 var(--sans); padding:12px 14px 8px}
+.rv-matrix{color:var(--plum); font-family:var(--sans)}
+.rv-matrix th,.rv-matrix td{padding:10px 8px; text-align:center; border-top:1px solid var(--line); vertical-align:middle; color:var(--plum)}
+.rv-matrix thead th{font:500 10.5px/1.25 var(--mono); letter-spacing:.03em; color:var(--mute); text-transform:uppercase; vertical-align:bottom; border-top:0}
+.rv-matrix tbody th{text-align:left; font:600 12.5px/1.35 var(--sans); position:sticky; left:0; background:var(--paper); min-width:128px; color:var(--plum)}
+.rv-matrix tr.us th,.rv-matrix tr.us td{background:var(--lime)}
+.mk{display:inline-block; width:15px; height:15px; border-radius:50%; vertical-align:middle}
+.mk.f{background:var(--plum)}
+.mk.p{box-shadow:inset 0 0 0 1.6px var(--plum); background:linear-gradient(90deg,var(--plum) 50%,transparent 50%)}
+.mk.n{width:12px; height:2px; border-radius:2px; background:color-mix(in srgb,var(--plum) 45%,var(--paper))}
+.rv-legend{display:flex; flex-wrap:wrap; gap:6px 16px; font:500 11.5px/1.4 var(--mono); color:var(--mute); margin:0 0 12px}
+.rv-legend span{display:inline-flex; align-items:center; gap:6px}
+.rv ol.gaps{margin:8px 0 14px; padding:0; list-style:none; display:grid; gap:10px; counter-reset:g}
+.rv ol.gaps li{counter-increment:g; position:relative; padding:12px 14px 12px 50px; background:var(--paper); border:1px solid var(--line); border-radius:14px}
+.rv ol.gaps li::before{content:"G" counter(g); position:absolute; left:12px; top:12px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--plum); color:var(--lime); font:600 11.5px/1 var(--mono)}
+.rv ol.gaps b{display:block; font:650 .98rem/1.3 var(--display); margin-bottom:3px}
+.rv ul.rq{margin:8px 0 14px; padding:0 0 0 20px} .rv ul.rq li{margin-bottom:6px}
+.rv .claim{background:var(--lime); border-radius:16px; padding:16px 18px; margin:14px 0}
+.rv .claim p{margin:0 0 8px} .rv .claim p:last-child{margin:0}
+.rv ul.lim{margin:6px 0 14px; padding:0 0 0 20px} .rv ul.lim li{margin-bottom:6px}
+.rv-refs{list-style:none; margin:8px 0 0; padding:0; font-size:13.5px; line-height:1.55}
+.rv-refs li{padding-left:22px; text-indent:-22px; margin-bottom:9px; overflow-wrap:anywhere}
+.rv-refs a{color:var(--plum); text-underline-offset:3px}
+.rv-toast{font:500 12px/1 var(--mono); color:var(--mute); opacity:0; transition:opacity .25s}
+.rv-toast.on{opacity:1}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){
+  .hero-grid{grid-template-columns:1fr; gap:28px}
+  .head{grid-template-columns:1fr; gap:14px}
+  .trio{grid-template-columns:1fr}
+  .gap-row{grid-template-columns:1fr}
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .f1,.f4,.f5,.f6{grid-column:span 2} .f2,.f3{grid-column:span 1}
+  .lit{grid-template-columns:1fr; gap:26px}
+  .lim{grid-template-columns:repeat(2,1fr)}
+  .links{grid-template-columns:1fr}
+  .clink{min-height:0; gap:20px}
+  .credits{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
+@media (min-width:900px){
+  .flow{grid-template-columns:1fr 1fr; column-gap:96px; row-gap:0; grid-auto-rows:minmax(38px,auto)}
+  .node{margin:9px 0}
+  .node:nth-of-type(1){grid-column:1; grid-row:1/span 4}
+  .node:nth-of-type(2){grid-column:2; grid-row:3/span 4}
+  .node:nth-of-type(3){grid-column:1; grid-row:5/span 4}
+  .node:nth-of-type(4){grid-column:2; grid-row:7/span 4}
+  .node:nth-of-type(5){grid-column:1; grid-row:9/span 4}
+  .node:nth-of-type(6){grid-column:2; grid-row:11/span 4}
+  .node:nth-of-type(7){grid-column:1; grid-row:13/span 4}
+  .node:nth-of-type(8){grid-column:2; grid-row:15/span 4}
+}
+@media (max-width:640px){
+  .dtab{padding:9px 10px; font-size:11.5px}
+  .d-tabs{gap:2px; margin-inline:14px; max-width:calc(100% - 28px)}
+  .d-head,.d-body{padding-inline:14px}
+  .sec.fade{padding-top:80px; padding-bottom:44px}
+  .hero{padding-top:96px}
+  .stats{grid-template-columns:1fr 1fr; margin-top:34px}
+  .stat:nth-child(3){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .stat{padding:16px}
+  #rankCanvas{height:262px}
+  .viz{padding:14px 12px 14px}
+  .card{padding:20px}
+  .bento{grid-template-columns:1fr}
+  .bento>*{grid-column:auto!important}
+  .brow{grid-template-columns:1fr auto; gap:8px}
+  .blabel{grid-column:1/-1}
+  .brow .btrack{grid-column:1}
+  .axis{grid-template-columns:1fr; gap:0}
+  .axis>div:first-child{display:none}
+  .axis>div:last-child{display:none}
+  .rrow{grid-template-columns:1fr auto; gap:8px}
+  .rl{grid-column:1/-1}
+  .rrow .rt{grid-column:1}
+  .rax{grid-template-columns:1fr; gap:0}
+  .rax>div:first-child,.rax>div:last-child{display:none}
+  .drow{grid-template-columns:1fr}
+  .dval{grid-column:1; margin-top:0}
+  .dax{grid-template-columns:1fr; gap:0}
+  .dax>div:first-child{display:none}
+  .counts{gap:8px}
+  .cc{padding:14px 11px; min-height:118px}
+  .cc .l{font-size:11.5px}
+  .lim{grid-template-columns:1fr}
+  .lim .card{min-height:0}
+  .credits{grid-template-columns:1fr}
+  .nav{padding-left:14px}
+  .nav .btn{padding:0 13px}
+  .vrow{padding:13px 16px}
+  .vt-head,.vt-foot{padding-inline:16px}
+  .flow{gap:36px}
+}
+@media (max-width:380px){
+  .nav .btn .long{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important; animation-iteration-count:1!important; transition-duration:.001s!important; scroll-behavior:auto!important}
+  .mq{animation:none}
+  h1 em path{stroke-dashoffset:0}
+  .reveal,.node{translate:0 0}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V6M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v13M6 13l6 6 6-6"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 13.5h6L10 21l8-10.5h-6L13 3z"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.7a3.5 3.5 0 0 1 0 6.6"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="M3 6.5h18v11H3zM3.5 7l8.5 6.5L20.5 7"/></symbol>
+    <symbol id="i-gh" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2.02c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></symbol>
+    <symbol id="i-in" viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></symbol>
+  </defs>
+</svg>
+
+<!-- NAV -->
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="#top" aria-label="BioXplain home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 9 C12 9 14 23 29 23" stroke="#F5FBDA" stroke-opacity=".55" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M3 23 C12 23 14 9 29 9" stroke="#D9EFBD" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M3 16 H29" stroke="#B9D175" stroke-width="3" stroke-linecap="round"/><circle cx="3" cy="16" r="2.5" fill="#B9D175"/><circle cx="29" cy="16" r="2.5" fill="#B9D175"/></svg>
+    BioXplain
+  </a>
+  <div class="nav-links">
+    <a href="#overview">Overview</a><a href="#pipeline">Pipeline</a><a href="#findings">Findings</a><a href="#literature">Literature</a><a href="#contact">Contact</a>
+  </div>
+  <button class="btn primary open-lit" type="button"><span><span class="long">Read </span>literature review</span> <span class="arr">→</span></button>
+</nav>
+
+<!-- HERO -->
+<header class="sec hero on-plum" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="kick">
+          <span class="pill"><b>GSE42568</b> + <b>GSE65194</b></span>
+          <span class="pill">GPL570 microarray</span>
+          <span class="pill"><b>20,848</b> genes</span>
+        </div>
+        <h1>Does a stable prediction mean a stable <em>reason<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 C40 2 80 12 120 6 S180 4 198 7"/></svg></em>?</h1>
+        <p class="hero-sub">An empirical study of breast-tissue gene-expression classifiers: four models, three explanation methods, 100 cross-validated folds, a 30-replicate chance baseline and an independent cohort. It asks whether a model's “important genes” survive a change of model, of explainer, or a trip to someone else's lab.</p>
+        <div class="cta">
+          <a class="btn primary" href="#findings">See what was found <span class="arr">→</span></a>
+          <button class="btn ghost open-lit" type="button">Open the literature review</button>
+        </div>
+      </div>
+      <div>
+        <div class="card viz shine" id="viz">
+          <div class="viz-top"><span>Top-6 genes · resampled</span><span class="live"><i></i>simulation</span></div>
+          <canvas id="rankCanvas" role="img" aria-label="Animated schematic: five columns of gene rankings from different model and explainer pairs reshuffle while one highlighted gene stays near the top."></canvas>
+          <div class="viz-foot">
+            <div class="vf"><span class="k">Accuracy</span><span class="v"><b>ROC-AUC ≈ 0.99</b> · flat</span><div class="flatline"></div></div>
+            <div class="vf"><span class="k">Top-6 overlap now</span><span class="v"><b id="ovl">—</b> shared</span><div class="meter"><i id="ovlBar"></i></div></div>
+          </div>
+          <p class="viz-note">Schematic of the question: accuracy stays put while the genes behind it reshuffle. Measured values are in Findings.</p>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="stats">
+      <div class="stat"><div class="n tnum" data-count="121">121</div><div class="l">discovery samples<br>104 cancer · 17 normal</div></div>
+      <div class="stat"><div class="n tnum" data-count="100">100</div><div class="l">cross-validation folds<br>20 repeats × 5 folds</div></div>
+      <div class="stat"><div class="n tnum" data-count="160">160</div><div class="l">automated tests<br>incl. leakage detection</div></div>
+      <div class="stat"><div class="n tnum" data-count="1" data-of="1,910">1 / 1,910</div><div class="l">candidate genes that<br>reached consensus</div></div>
+    </div>
+    <div class="hero-end"></div>
+  </div>
+</header>
+
+<main>
+
+<!-- 01 OVERVIEW -->
+<section class="sec fade on-cream from-plum" id="overview">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow"><b>01</b>Contribution at a glance</span>
+      <h2>What was done, what turned up, and what is actually new</h2>
+      <p class="lede">Stable, leakage-safe gene selection already exists as software. The contribution here is the empirical question around it, answered end to end and reported as it came out.</p>
+    </div>
+
+    <div class="trio">
+      <article class="card c-do shine spot reveal" style="--s1:var(--lime);--s2:var(--mint)">
+        <span class="tag"><i></i>What I did</span>
+        <h3>Built and ran the whole study</h3>
+        <ul>
+          <li><svg class="ico"><use href="#i-check"/></svg><span>Wrote a leakage-safe Python workflow with 160 tests and 22 methodology decisions fixed before any result.</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span>Trained 4 models × 3 explainers on GSE42568 (121 samples, 20,848 genes).</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span>Measured stability across resampling, model and explainer against a 30-replicate permutation null.</span></li>
+          <li><svg class="ico"><use href="#i-check"/></svg><span>Froze the discovery, then replicated in GSE65194 and tested enrichment and tissue composition.</span></li>
+        </ul>
+      </article>
+
+      <article class="card c-find reveal">
+        <span class="tag"><i></i>What I found</span>
+        <h3>Accuracy says nothing about which genes</h3>
+        <ul>
+          <li><svg class="ico"><use href="#i-arrow"/></svg><span>Every model scores ROC-AUC 0.975–0.997, yet gene-list stability (Φ) spans 0.14–0.59.</span></li>
+          <li><svg class="ico"><use href="#i-arrow"/></svg><span>Model, explainer and regularisation change the gene list while leaving accuracy untouched.</span></li>
+          <li><svg class="ico"><use href="#i-arrow"/></svg><span>Only 1 of 1,910 candidate genes reached consensus.</span></li>
+          <li><svg class="ico"><use href="#i-arrow"/></svg><span>Strong external replication is largely a tissue-composition signal.</span></li>
+        </ul>
+      </article>
+
+      <article class="card c-new tilt reveal">
+        <span class="tag"><i></i>What is new</span>
+        <h3>A measured answer, not a new algorithm</h3>
+        <ul>
+          <li><svg class="ico"><use href="#i-layers"/></svg><span>A chance-corrected split of explanation instability into resampling, model and explainer.</span></li>
+          <li><svg class="ico"><use href="#i-loop"/></svg><span>A pre-specified test of whether stability predicts replication beyond effect size (partial Spearman ≈ 0.08).</span></li>
+          <li><svg class="ico"><use href="#i-users"/></svg><span>An explicit tissue-composition check, with negative results reported as negative.</span></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="gap-row">
+      <figure class="card quote reveal" style="margin:0">
+        <div class="qm" aria-hidden="true">“</div>
+        <blockquote>An open-source, tested Python workflow and an empirical study of how consistently different model–explainer pairs identify the same genes, whether that consistency predicts replication in an independent cohort, and how far pathway enrichment can be trusted given tissue-composition confounding.</blockquote>
+        <footer>The working thesis · gap_analysis.md, written before the discovery run</footer>
+      </figure>
+
+      <div class="card vtable reveal">
+        <div class="vt-head"><span>Draft assumption</span><span>Verdict after review</span></div>
+        <div class="vrow"><span class="claim">“Stability analysis is what differentiates BioXplain”</span><span class="vb no"><svg class="ico" style="width:12px;height:12px"><use href="#i-x"/></svg>Not novel</span><span class="why">Already done, often better: Stabl, OmicSelector, RobustModelMaker.</span></div>
+        <div class="vrow"><span class="claim">“A leakage-safe pipeline is a contribution”</span><span class="vb no"><svg class="ico" style="width:12px;height:12px"><use href="#i-x"/></svg>Not novel</span><span class="why">Table stakes for the field.</span></div>
+        <div class="vrow"><span class="claim">“Cross-model consensus is new”</span><span class="vb part"><svg class="ico" style="width:12px;height:12px"><use href="#i-dash"/></svg>Partly</span><span class="why">Exists, but formulas were mostly ad hoc weights.</span></div>
+        <div class="vrow"><span class="claim">“SHAP explanations are sufficient on their own”</span><span class="vb part"><svg class="ico" style="width:12px;height:12px"><use href="#i-dash"/></svg>Partly</span><span class="why">Unstable under collinearity and seed changes.</span></div>
+        <div class="vt-foot"><button class="linkbtn open-lit" data-tab="gap" type="button"><span class="u">See all 7 verdicts with evidence</span><span class="arr">→</span></button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 PIPELINE -->
+<section class="sec fade on-plum from-cream" id="pipeline">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow"><b>02</b>How it works</span>
+      <h2>From raw arrays to a replication test, eight fixed stages</h2>
+      <p class="lede">Every learned step (expression filter, probe-to-gene collapse, scaler, model, explainer) is fitted on the training fold only. A corrupted validation fold changes the predictions and nothing else, and a test enforces it.</p>
+    </div>
+
+    <div class="flow" id="flow">
+      <article class="node" style="--c:var(--lime)">
+        <div class="n-top"><span class="badge">01</span><span class="stage">DATA</span></div>
+        <h3>GEO discovery cohort</h3>
+        <p>GSE42568, 104 tumour and 17 normal samples. Metadata verified against four concordant fields; a probe universe shared with the external cohort.</p>
+        <div class="chips"><span>GSE42568</span><span>GPL570</span><span>20,848 genes</span></div>
+      </article>
+      <article class="node" style="--c:var(--mint)">
+        <div class="n-top"><span class="badge">02</span><span class="stage">SPLIT</span></div>
+        <h3>Leakage-safe cross-validation</h3>
+        <p>Repeated stratified 5-fold splits. Filter, probe collapse and scaler are refit inside every training fold only.</p>
+        <div class="chips"><span>20 × 5 = 100 folds</span><span>fold-internal</span></div>
+      </article>
+      <article class="node" style="--c:var(--cream)">
+        <div class="n-top"><span class="badge">03</span><span class="stage">MODELS</span></div>
+        <h3>Four model families</h3>
+        <p>Logistic regression, linear SVM, random forest and XGBoost, plus two extra regularisation settings as a sensitivity check.</p>
+        <div class="chips"><span>LogReg</span><span>SVM</span><span>RF</span><span>XGBoost</span></div>
+      </article>
+      <article class="node" style="--c:var(--lime)">
+        <div class="n-top"><span class="badge">04</span><span class="stage">EXPLAIN</span></div>
+        <h3>Three explainers and a baseline</h3>
+        <p>Coefficients, SHAP and exact permutation importance (verified to 1e-12 against brute force), plus a Welch-t baseline. Top-k sets at k = 10, 25, 50.</p>
+        <div class="chips"><span>coefficients</span><span>SHAP</span><span>permutation</span><span>Welch-t</span></div>
+      </article>
+      <article class="node" style="--c:var(--mint)">
+        <div class="n-top"><span class="badge">05</span><span class="stage">STABILITY</span></div>
+        <h3>Chance-corrected stability</h3>
+        <p>Nogueira Φ, Kuncheva and Jaccard measured across four dimensions: resampling, model, explainer and combined.</p>
+        <div class="chips"><span>Φ</span><span>Kuncheva</span><span>Jaccard</span></div>
+      </article>
+      <article class="node" style="--c:var(--cream)">
+        <div class="n-top"><span class="badge">06</span><span class="stage">NULL</span></div>
+        <h3>Permutation-label null</h3>
+        <p>30 replicates give each pipeline a chance reference: is its stability above what shuffled labels already produce?</p>
+        <div class="chips"><span>30 replicates</span><span>k = 25</span></div>
+      </article>
+      <article class="node" style="--c:var(--lime)">
+        <div class="n-top"><span class="badge">07</span><span class="stage">FREEZE</span></div>
+        <h3>Consensus, then a freeze</h3>
+        <p>A transparent, un-weighted frequency table is committed as the discovery freeze before the external cohort is opened.</p>
+        <div class="chips"><span>consensus rule</span><span>committed</span></div>
+      </article>
+      <article class="node" style="--c:var(--mint)">
+        <div class="n-top"><span class="badge">08</span><span class="stage">REPLICATE</span></div>
+        <h3>External cohort and checks</h3>
+        <p>GSE65194 (130 tumour, 11 healthy) with scale-free endpoints, then pathway enrichment and a tissue-composition check.</p>
+        <div class="chips"><span>GSE65194</span><span>enrichment</span><span>composition</span></div>
+      </article>
+    </div>
+    <p class="flow-hint">Hover any stage to light up the lines on either side of it.</p>
+  </div>
+</section>
+
+<!-- 03 FINDINGS -->
+<section class="sec fade on-cream from-plum" id="findings">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow"><b>03</b>What was found</span>
+      <h2>Six findings, reported the way they came out</h2>
+      <p class="lede">Every number is read from a committed result file. Nothing was re-run because the first answer looked unflattering, and two of these six are, by design, not flattering.</p>
+    </div>
+
+    <div class="bento">
+      <article class="card f1 shine spot reveal" style="--s1:var(--lime);--s2:var(--mint)">
+        <div class="tagrow"><span class="tag">Finding 01 · accuracy ≠ reproducibility</span><span class="t2">one axis, 0 to 1</span></div>
+        <h3>Every model is about 99% accurate. Their gene lists barely agree.</h3>
+        <p>All seven configurations separate tumour from normal almost perfectly. The share of top-25 genes that survives resampling (Nogueira Φ) is a different story.</p>
+        <div class="bars" id="f1bars">
+          <div class="brow"><span class="blabel">ROC-AUC · highest</span><div class="btrack"><div class="bfill" style="--w:99.7%"></div></div><span class="bval tnum">0.997</span></div>
+          <div class="brow"><span class="blabel">Φ · best (SVM + permutation)</span><div class="btrack"><div class="bfill mint" style="--w:59.1%"></div></div><span class="bval tnum">0.59</span></div>
+          <div class="brow"><span class="blabel">Φ · worst (RF + SHAP)</span><div class="btrack"><div class="bfill hatch" style="--w:14.2%"></div></div><span class="bval tnum">0.14</span></div>
+          <div class="axis"><div></div><div><span style="left:0">0</span><span style="left:50%">0.5</span><span style="left:100%">1</span></div><div></div></div>
+        </div>
+      </article>
+
+      <article class="card f2 reveal">
+        <div class="dots" aria-hidden="true"></div><div class="one" aria-hidden="true"></div>
+        <span class="tag">Finding 02 · consensus</span>
+        <div class="big tnum"><span data-count="1">1</span><small>of 1,910</small></div>
+        <div>
+          <span class="gene">DKFZp779M0652</span>
+          <p style="margin-top:10px">The only gene to meet the pre-registered rule: picked by 5 pipelines across 2 models and all 3 explainers, mean selection frequency 0.48.</p>
+        </div>
+      </article>
+
+      <article class="card f3 shine reveal">
+        <div class="tbar"><i></i><i></i><i></i><span>logreg · stability_by_C</span></div>
+        <div class="tag3"><span class="tag">Finding 03 · regularisation paradox</span></div>
+        <div class="tbody">
+          <div class="tl"><span class="p">$</span> stability --model logreg --k 25<span class="cursor"></span></div>
+          <div class="tl">C = 0.1 &nbsp;→ Φ <b class="ok">0.396</b></div>
+          <div class="tl">C = 1 &nbsp;&nbsp;&nbsp;→ Φ <b class="lo">0.222</b> <em>← default</em></div>
+          <div class="tl">C = 100 → Φ <b class="ok">0.417</b></div>
+          <div class="tl dim"># ROC-AUC 0.996–0.997 for all three</div>
+        </div>
+      </article>
+
+      <article class="card f4 reveal">
+        <div class="tagrow"><span class="tag">Finding 04 · observed vs. 30-replicate chance null</span></div>
+        <h3>Most pipelines clear the null. The primary logistic regression does not.</h3>
+        <div class="rng" id="f4rng">
+          <div class="rrow"><span class="rl">SVM · permutation</span><div class="rt"><div class="nullb" style="left:26.6%;width:19%"></div><div class="obs" style="left:85.7%"></div></div><span class="rs"><svg class="ico"><use href="#i-up"/></svg>above null</span></div>
+          <div class="rrow"><span class="rl">XGBoost · SHAP</span><div class="rt"><div class="nullb" style="left:10.1%;width:21.4%"></div><div class="obs" style="left:40%"></div></div><span class="rs"><svg class="ico"><use href="#i-up"/></svg>above null</span></div>
+          <div class="rrow"><span class="rl">RF · SHAP</span><div class="rt"><div class="nullb" style="left:1.6%;width:16.6%"></div><div class="obs" style="left:19.6%"></div></div><span class="rs"><svg class="ico"><use href="#i-up"/></svg>above null</span></div>
+          <div class="rrow"><span class="rl">LogReg · coef (primary)</span><div class="rt"><div class="nullb" style="left:32.6%;width:25%"></div><div class="obs below" style="left:32.1%"></div></div><span class="rs"><svg class="ico"><use href="#i-down"/></svg>below null</span></div>
+          <div class="rax"><div></div><div><span style="left:0">0</span><span style="left:28.6%">0.2</span><span style="left:57.1%">0.4</span><span style="left:85.7%">0.6</span></div><div></div></div>
+        </div>
+        <div class="legend"><span><i class="lg-b"></i>null range (2.5th–97.5th pct)</span><span><i class="lg-o"></i>observed Φ, above</span><span><i class="lg-h"></i>observed Φ, below</span></div>
+      </article>
+
+      <article class="card f5 tilt reveal">
+        <div class="tagrow"><span class="tag">Finding 05 · the composition confound</span></div>
+        <h3>The replication is real, but mostly a tissue-composition signal</h3>
+        <p>The frozen top-25 signature separates the external cohort at AUC 0.995. Regress out an adipose-marker component and it falls to 0.572, near chance. In discovery it barely moves.</p>
+        <div class="dumb" id="f5d">
+          <div class="drow"><span class="dlab">External cohort</span><div class="dtrack"><div class="dseg" style="left:14.4%;width:84.6%"></div><div class="dpt b" style="left:14.4%"></div><div class="dpt a" style="left:99%"></div></div><span class="dval tnum">0.995 → 0.572</span></div>
+          <div class="drow"><span class="dlab">Discovery cohort</span><div class="dtrack"><div class="dseg" style="left:91%;width:9%"></div><div class="dpt b" style="left:91%"></div><div class="dpt a" style="left:100%"></div></div><span class="dval tnum">1.000 → 0.955</span></div>
+          <div class="dax"><div></div><div><span style="left:0">0.5 chance</span><span style="left:50%">0.75</span><span style="left:100%">1.0</span></div></div>
+        </div>
+        <div class="dleg"><span><i style="background:var(--lime)"></i>signature AUC</span><span><i style="background:var(--plum);box-shadow:inset 0 0 0 2.5px var(--cream)"></i>after removing the adipose component</span></div>
+      </article>
+
+      <article class="card f6 reveal">
+        <span class="tag">Finding 06 · enrichment</span>
+        <div>
+          <div class="zero tnum">0<small>of 7,037 terms survive correction</small></div>
+        </div>
+        <p>No GO, Reactome or MSigDB Hallmark term was significant for the 50 most consistent genes.</p>
+        <span class="mono-note">min. adjusted p = 0.51 to 1.00 · reported as a negative result</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- RIGOR BAND -->
+<div class="band fade-band" id="rigor" aria-label="Rigor checks">
+  <div class="mq" id="mq">
+    <div class="mq-set">
+      <span class="mq-item">160 automated tests passing</span>
+      <span class="mq-item">every learned step fitted inside the training fold</span>
+      <span class="mq-item">permutation importance verified to 1e-12 against brute force</span>
+      <span class="mq-item">22 methodology decisions written before results</span>
+      <span class="mq-item">discovery frozen before the external cohort was opened</span>
+      <span class="mq-item">30-replicate permutation-label null</span>
+      <span class="mq-item">a deliberately leaky pipeline caught by its own test</span>
+      <span class="mq-item">bit-identical reruns</span>
+    </div>
+  </div>
+</div>
+
+<!-- 04 LITERATURE -->
+<section class="sec fade on-plum from-lime" id="literature">
+  <div class="wrap">
+    <div class="lit">
+      <div>
+        <span class="eyebrow"><b>04</b>Reading room</span>
+        <h2>The literature review is part of the deliverable</h2>
+        <p class="lede">A critical review of 23 papers and 13 open-source tools, written the way a thesis chapter is: themes, a comparison of what each source reports, the gaps that remain, and where BioXplain sits. The annotated sources, repository audit and gap verdicts are in the same reader.</p>
+        <div class="cta">
+          <button class="btn primary open-lit" type="button">Open the literature review <span class="arr">→</span></button>
+          <button class="btn ghost open-lit" data-tab="gap" type="button">Gap verdicts</button>
+        </div>
+      </div>
+      <div class="counts">
+        <div class="cc cc1 reveal"><div class="n tnum">23</div><div class="l">papers reviewed</div></div>
+        <div class="cc cc2 reveal"><div class="n tnum">13</div><div class="l">open-source tools audited</div></div>
+        <div class="cc cc3 reveal"><div class="n tnum">7</div><div class="l">draft assumptions tested</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 LIMITS -->
+<section class="sec fade on-cream from-plum" id="limits">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow"><b>05</b>Where this stops short</span>
+      <h2>What this is not claiming</h2>
+      <p class="lede">The boundaries are part of the result. Four limits shape how far any sentence on this page can be pushed.</p>
+    </div>
+    <div class="lim">
+      <article class="card l1 reveal">
+        <svg class="ico"><use href="#i-loop"/></svg>
+        <h3>Not causal, not a biomarker</h3>
+        <p>Every gene named here is a model-supported, selection-frequency-ranked signal, never a validated or causal finding.</p>
+      </article>
+      <article class="card l2 reveal">
+        <svg class="ico"><use href="#i-arrow"/></svg>
+        <h3>Same platform, not cross-technology</h3>
+        <p>Both cohorts run on GPL570. “Independent” means an independent cohort, not an independent assay.</p>
+      </article>
+      <article class="card l3 reveal">
+        <div class="big2 tnum">17 · 11<small>normals</small></div>
+        <h3>Small normal groups</h3>
+        <p>17 discovery and 11 external normals. Every confidence interval is wide and reported as such.</p>
+      </article>
+      <article class="card l4 reveal">
+        <svg class="ico"><use href="#i-bolt"/></svg>
+        <h3>An unresolved pattern</h3>
+        <p>Logistic regression's three regularisation settings agree with each other less under real labels than under permuted ones. Reported, not explained away.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- CONTACT + CREDITS -->
+<footer class="sec fade contact on-plum from-cream" id="contact">
+  <div class="wrap">
+    <div class="contact-h">
+      <div>
+        <span class="eyebrow"><b>06</b>Contact</span>
+        <h2 style="margin-top:14px">Questions, critique or collaboration are welcome</h2>
+      </div>
+    </div>
+    <div class="links">
+      <div class="clink cl-mail reveal">
+        <div class="top"><span class="lab">Email</span><svg class="ico" style="width:30px;height:30px;stroke-width:1.8"><use href="#i-mail"/></svg></div>
+        <div>
+          <div class="handle" id="emailText">hirabaig1357@gmail.com</div>
+          <div class="row" style="margin-top:14px">
+            <a class="btn primary" href="mailto:hirabaig1357@gmail.com">Write <span class="arr">→</span></a>
+            <button class="btn ghost" id="copyMail" type="button">Copy</button>
+            <span class="toast" id="toast" role="status"></span>
+          </div>
+        </div>
+      </div>
+      <a class="clink cl-gh shine reveal" href="https://github.com/hiramustafabaig" target="_blank" rel="noopener">
+        <div class="top"><span class="lab">GitHub</span><svg class="big-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gh"/></svg></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><span class="handle">github.com/hiramustafabaig</span><span class="go"><svg class="ico"><use href="#i-arrow"/></svg></span></div>
+      </a>
+      <a class="clink cl-in reveal" href="https://www.linkedin.com/in/hira-baig-195b13338/" target="_blank" rel="noopener">
+        <div class="top"><span class="lab">LinkedIn</span><svg class="big-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-in"/></svg></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><span class="handle">linkedin.com/in/hira-baig-195b13338</span><span class="go"><svg class="ico"><use href="#i-arrow"/></svg></span></div>
+      </a>
+    </div>
+
+    <div class="credits">
+      <div>
+        <h4>Credits</h4>
+        <div class="byline"><div class="avatar">HB</div><div><div class="nm">Hira Baig</div><div class="rl2">Research &amp; engineering</div></div></div>
+      </div>
+      <div>
+        <h4>Data &amp; tools</h4>
+        <ul>
+          <li><b>GSE42568</b> · Clarke et al., Dublin City University</li>
+          <li><b>GSE65194</b> · Institut Curie, Maire cohort</li>
+          <li>scikit-learn · XGBoost · SHAP · GSEApy</li>
+          <li>pandas · numpy · scipy · pytest</li>
+        </ul>
+      </div>
+    </div>
+    <div class="endline"><span>BIOXPLAIN · EXPLANATION STABILITY &amp; CROSS-COHORT REPLICATION</span><span>Student research-portfolio project, not a peer-reviewed publication · licence to be finalised before release</span></div>
+  </div>
+</footer>
+
+<!-- LITERATURE DRAWER -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true">
+  <div class="d-head">
+    <h3 id="dTitle">Reading room</h3>
+    <button class="d-close" id="dClose" type="button" aria-label="Close literature review"><svg class="ico"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="d-tabs" role="tablist">
+    <button class="dtab" role="tab" data-tab="review" aria-selected="true">Review</button>
+    <button class="dtab" role="tab" data-tab="lit" aria-selected="false">Sources · 23</button>
+    <button class="dtab" role="tab" data-tab="repo" aria-selected="false">Repos · 13</button>
+    <button class="dtab" role="tab" data-tab="gap" aria-selected="false">Verdicts · 7</button>
+  </div>
+  <div class="d-body" id="dBody">
+    <div class="dpanel active" id="panel-review">
+<article class="rv" id="rvText">
+  <h4 class="rv-title">Stability of model explanations in high-dimensional gene-expression classifiers: a critical review</h4>
+  <p class="rv-meta">Literature review for BioXplain · September 2026 · structured critical narrative review</p>
+  <div class="rv-actions">
+    <button class="btn primary" id="rvCopy" type="button">Copy review as text</button>
+    <span class="rv-toast" id="rvToast" role="status"></span>
+  </div>
+  <nav class="rv-toc" aria-label="Review sections">
+    <a href="#rv-intro" data-rv="rv-intro">1 Introduction</a><a href="#rv-themes" data-rv="rv-themes">2 Themes</a><a href="#rv-synth" data-rv="rv-synth">3 Synthesis</a><a href="#rv-gaps" data-rv="rv-gaps">4 Gaps</a><a href="#rv-study" data-rv="rv-study">5 This study</a><a href="#rv-limits" data-rv="rv-limits">6 Limits</a><a href="#rv-refs" data-rv="rv-refs">References</a>
+  </nav>
+
+  <div class="sum">
+    <p><b>Summary.</b> Gene signatures have been known to be unstable for two decades, and recent software delivers stable, leakage-safe gene selection. Explanation methods are also known to disagree. Within the sources reviewed, however, no study (i) separates instability into its resampling, model and explainer components on one transcriptomic task, (ii) compares each against a matched permutation-label chance reference, (iii) tests whether internal stability predicts replication in an independent cohort beyond effect size, or (iv) checks whether stable genes reflect tissue composition. BioXplain addresses these four points together. It does not propose a new algorithm.</p>
+  </div>
+
+  <h5 id="rv-scope">Scope and approach</h5>
+  <div class="scope">
+    <p><strong>Type of review.</strong> This is a structured, critical narrative review, not a systematic review. Its aims are to establish what is known about the stability of gene selections and model explanations in high-dimensional expression data, to identify where the evidence is silent, and to position the present study.</p>
+    <p><strong>Approach.</strong> Literature searches and an open-source repository audit were carried out in September 2026 (a reconnaissance dated 20 September 2026, extended by one update). They were guided by four questions: how stable are the genes that classifiers select; which tools already deliver stable, leakage-safe selection; how far do explanation methods agree; and do stable genes replicate in independent cohorts. Each retained source was appraised at the level of its abstract or published summary and recorded against a fixed template: data, method, models, explainability, validation, findings, limitations, and overlap with the present study.</p>
+    <p><strong>Scope.</strong> The review covers 23 scholarly sources (2005 to 2026) on feature-selection stability, explanation methods, external validation and tissue-composition confounding in breast-cancer and wider omics classification, together with 13 open-source repositories audited for overlap and licensing. Work that does not concern expression or omics data, or the stability or agreement of selections and explanations, is outside its scope.</p>
+  </div>
+
+  <h5 id="rv-intro">1 Introduction</h5>
+  <p>Gene-expression profiles separate tumour from normal breast tissue almost perfectly, and machine-learning models are routinely used to nominate “important genes” from matrices with tens of thousands of features and, often, only a hundred or so samples. Because accuracy sits at ceiling, it cannot discriminate between analytic choices: a 2025 IEEE study reports accuracies of about 0.99 to 1.0 on three breast-cancer cohorts, including GSE42568. What is less studied is whether the genes a model credits are reproducible properties of the disease, of the composition of the sample, or of the analyst’s modelling choices.</p>
+  <p>Two terms are used throughout. <em>Stability</em> is the degree to which the same features are selected when the data, the model or the procedure are perturbed. An <em>explanation</em> is a set of per-gene importance scores derived from a fitted model, such as a coefficient, a SHAP attribution or a permutation importance; these measure different quantities and need not agree. Section 2 reviews five bodies of work, Section 3 compares them, Section 4 states the gaps that remain, Section 5 positions the present study, and Section 6 sets out the limits of this review.</p>
+
+  <h5 id="rv-themes">2 Thematic review</h5>
+
+  <h6>2.1 Instability of gene signatures is long established</h6>
+  <p>Concern that gene signatures are unstable predates modern explainability. Ein-Dor et al. (2005) showed that published breast-cancer outcome signatures overlap very little and that many equally predictive signatures exist, so a single “unique” list is unlikely. Haury et al. (2011) benchmarked feature-selection methods on four breast-cancer expression datasets and found that a simple t-test filter was competitive with, and often more stable than, more complex selectors. A recent single-author analysis reaches the same conclusion with modern classifiers: Sirohi (2026) reports that random forest and linear SVM models exceeded 99% accuracy on TCGA data, yet only 14 of 75 panel genes were selected in at least 80% of 60 resamples, with canonical markers among the least stable. The three studies converge on one point, that accuracy is a poor guide to gene identity. They stop, however, at the selector, and none decomposes where the instability comes from.</p>
+
+  <h6>2.2 Measuring stability against chance</h6>
+  <p>Quantifying stability requires care because overlap between selected sets is partly produced by chance. Nogueira, Sechidis and Brown (2018) proposed an axiomatic, chance-corrected estimator (Φ) with confidence intervals, and Bommert et al. (2021) provide a reference library of 20 stability measures against which implementations can be validated. Application papers still commonly report Jaccard or Kuncheva indices on their own (for example Sirohi, 2026). A limitation shared by these measures is that they summarise a set of selections but do not say whether the observed value exceeds what shuffled labels would already produce; that requires an explicit null reference. Analytic settings also matter: a 2024 multi-omics study reports that stability rose with stronger regularisation across classifiers, although whether this holds for the default settings most analysts use is rarely examined.</p>
+
+  <h6>2.3 Stability-aware, leakage-safe selection tools</h6>
+  <p>A second body of work builds selectors that are stable by design. Stabl (Hédou et al., 2024) combines noise injection with a data-driven reliability threshold on stability selection and, across five clinical omics studies, yields sparser and more reliable biomarker sets than lasso or elastic net at similar predictive performance. Parvandeh et al. (2020) use agreement across inner cross-validation folds as a selection criterion, and RobustModelMaker (Barnard, 2026, preprint) couples bootstrap stability selection with leakage-safe nested cross-validation across nine algorithms. OmicSelector (software) offers zero-leakage nested selection with the Nogueira index in R. These contributions establish that stable, leakage-safe selection is available and well engineered. They are, however, selectors: they decide which features to keep, rather than evaluating how the explanations of arbitrary fitted models agree, and the records reviewed report no explainer comparison and no independent test of whether the stable features replicate.</p>
+
+  <h6>2.4 Disagreement between explanations</h6>
+  <p>A third literature asks whether the explanations themselves are reproducible. Krishna et al. (2022) formalised the disagreement problem: post-hoc methods such as LIME, SHAP and gradient-based techniques frequently disagree on both feature ranking and direction on standard tabular benchmarks. In omics-scale settings the evidence is accumulating but fragmented across model families. Zuo, Yang and Zhao (2026) compared six explainability methods for survival prediction with a neural network and found DeepSHAP the most stable and permutation importance close to unstable under collinearity. Claborne et al. (2026) found that SHAP rankings in multi-omics deep networks varied across random seeds and architectures. Caraker, Arnold and Rhoads (2026, preprint) showed in simulation that sequential residual fitting in gradient boosting concentrates SHAP credit on the first-chosen of several correlated features, and that seed averaging restores stability. A snippet-level report of stable feature selection with graph convolutional networks and layer-wise relevance propagation likewise describes more stable breast-cancer gene lists than SHAP-based selection.</p>
+  <p>The shared message is that explanation stability depends on the model, the explainer and collinearity. Yet each study examines one model family or one explainer family, uses its own stability definition and, in the records reviewed, reports no chance reference. None tabulates linear, kernel, tree-ensemble and boosted models against coefficient, SHAP and permutation explanations on one transcriptomic task. A 2026 preprint on a robust SHAP-stability metric indicates continuing methodological interest but proposes a metric rather than an empirical decomposition.</p>
+
+  <h6>2.5 Consensus and aggregation across methods</h6>
+  <p>Because single explanations are unreliable, several authors combine evidence across selectors or models. Parvandeh et al. (2020) use consensus across inner folds, rank-aggregation approaches treat stability as a design objective, and a breast-cancer subtyping repository (OncoResolve, 2026) pairs a tri-method consensus selector (ANOVA, lasso and random forest, at least two of three votes) with SHAP and four-cohort external validation. Scoring rules, however, are often ad hoc: Shafik et al. (2026), studying Alzheimer’s disease with XGBoost and TreeSHAP, retain genes through a composite score weighted 0.4/0.3/0.3 without systematic justification and report no external cohort. The literature therefore supports consensus as an idea but offers little evidence on how a consensus rule performs against independent data, or on whether transparent, un-weighted alternatives suffice.</p>
+
+  <h6>2.6 Does stability imply replicability? External validation and tissue composition</h6>
+  <p>The remaining question is whether stable genes are the genes that replicate. Stability is frequently read as a sign of trustworthiness, but the literature reviewed offers no direct test of that assumption. External validation is increasingly reported, yet it typically evaluates classifier performance rather than gene-level replication: Sirohi (2026) transfers classifiers to an independent CPTAC cohort and notes that transfer required batch normalisation, and Stabl is validated on independent cohorts for predictive performance.</p>
+  <p>Interpretation is a further difficulty. Tissue homogenates are mixtures of cell types. Yoshihara et al. (2013) showed that tumour purity and stromal and immune admixture vary strongly and confound expression analyses, and Elloumi et al. (2011) showed that contamination by non-neoplastic tissue systematically shifts genomic classifiers in breast tumour samples. Because adipose tissue is a major component of breast stroma (Frontiers in Oncology, 2020), tumour-versus-normal contrasts may rank adipocyte genes highly for reasons of sample composition rather than tumour biology. In the records reviewed, none of the explanation-stability studies checks for this, and enrichment results from unstable lists (Sirohi reports 136 GO terms) are rarely examined against it.</p>
+
+  <h5 id="rv-synth">3 Synthesis: what has been reported, and what has not</h5>
+  <p>Table 1 sets the central sources against the features that the present study combines. Read column by column, it shows where the field is strong (stability at the level of the selector) and where the records reviewed report nothing.</p>
+  <div class="rv-tablewrap">
+    <table class="rv-matrix">
+      <caption>Table 1. Concept matrix: features reported by each key source</caption>
+      <thead><tr><th scope="col">Source</th><th scope="col">Resampling stability</th><th scope="col">Several model families</th><th scope="col">Several explainers</th><th scope="col">Chance reference (permutation null)</th><th scope="col">Independent cohort used</th><th scope="col">Stability → replication tested</th><th scope="col">Tissue-composition check</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Sirohi (2026)</th><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Hédou et al. (2024), Stabl</th><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Barnard (2026), RobustModelMaker</th><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Haury et al. (2011)</th><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Zuo et al. (2026)</th><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Claborne et al. (2026)</th><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk p" role="img" aria-label="partly"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr><th scope="row">Krishna et al. (2022)</th><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td><td><span class="mk n" role="img" aria-label="not reported"></span></td></tr>
+        <tr class="us"><th scope="row">Present study (BioXplain)</th><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td><td><span class="mk f" role="img" aria-label="reported"></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="rv-hint">Swipe the table sideways: the last two columns (stability → replication, tissue composition) carry the main contrast.</p>
+  <div class="rv-legend"><span><i class="mk f"></i>reported in the record</span><span><i class="mk p"></i>partly (see text)</span><span><i class="mk n"></i>not reported in the record reviewed</span></div>
+  <p>Three observations follow. First, stability is well studied at the level of the selector (Sections 2.1 to 2.3), with strong tools. Second, explanation disagreement is documented (Section 2.4), but one model family or one explainer family at a time, and without a chance reference. Third, the right-hand columns are empty for every source: none of the records reviewed tests whether stability predicts independent replication, and none checks tissue composition. A dash in Table 1 records the absence of a report at abstract or summary level, not proof of absence.</p>
+
+  <h5 id="rv-gaps">4 Research gaps</h5>
+  <p>The synthesis leaves four gaps. Each is stated as what is known, what is missing and why it matters, following the evidence in Section 2.</p>
+  <ol class="gaps">
+    <li><b>Joint decomposition of explanation instability.</b>Stability has been measured for selectors and, separately, for single explainer families. No study found tabulates instability across resampling, model class and explainer on one task under one pipeline, so the contribution of each source of instability is unknown.</li>
+    <li><b>An untested assumption that stability predicts replication.</b>Stable genes are generally treated as more trustworthy. The records reviewed do not test whether internal stability predicts replication in an independent cohort beyond what discovery effect size already predicts.</li>
+    <li><b>Missing baselines and chance references.</b>Haury et al. (2011) found a simple univariate filter competitive, yet such a baseline is often absent from the application papers reviewed, and stability values are seldom compared with what shuffled labels produce. Without both, a stability score cannot be interpreted.</li>
+    <li><b>Unexamined composition confounding.</b>Contamination and admixture are known to bias breast-tissue classifiers (Elloumi et al., 2011; Yoshihara et al., 2013). Stable, replicable and apparently meaningful genes may nonetheless reflect sample composition, and this is rarely tested.</li>
+  </ol>
+  <p>These gaps are bounded by the search described in the scope note; they identify where the sources reviewed are silent, not where no work exists.</p>
+
+  <h5 id="rv-study">5 The present study</h5>
+  <p>BioXplain is an empirical evaluation, with a tested and reproducible Python workflow, designed to occupy this niche. It asks four questions, one for each gap:</p>
+  <ul class="rq">
+    <li><strong>RQ1.</strong> How consistently do machine-learning explanations identify the same genes across resampling, model class and explainer, and how does that compare with a permutation-label chance reference?</li>
+    <li><strong>RQ2.</strong> Does a gene’s internal selection stability predict its replication in an independent cohort beyond its discovery effect size?</li>
+    <li><strong>RQ3.</strong> How much of the signature-level replication is attributable to tissue composition?</li>
+    <li><strong>RQ4.</strong> Do enrichment analyses of the most stable genes support biological interpretation?</li>
+  </ul>
+  <p>Four model families (logistic regression, linear SVM, random forest, XGBoost) are crossed with three explainers (coefficients, SHAP, exact permutation importance) and a Welch-t baseline on GSE42568 (121 samples: 104 cancer, 17 normal). Every learned step is fitted inside the training fold, stability is measured as Nogueira Φ at k = 10, 25 and 50, and each pipeline is referenced against a 30-replicate permutation-label null. The discovery results are frozen before the independent cohort GSE65194 (141 samples: 130 tumours, 11 healthy) is opened.</p>
+  <p><strong>Preview of findings.</strong> Every model reaches ROC-AUC 0.975 to 0.997, yet resampling stability at k = 25 ranges from Φ = 0.14 to 0.59 across pipelines, and only a subset exceeds its null; the primary logistic-regression pipeline falls below it. Internal stability shows a small association with gene-level replication beyond discovery effect size (partial Spearman ≈ 0.08). A frozen signature replicates at AUC 0.995 externally but falls to 0.572 once an adipose-marker component is removed. No enrichment term survives correction (minimum adjusted p = 0.51).</p>
+  <div class="claim">
+    <p><strong>Where the study sits.</strong> It adds a chance-referenced decomposition of explanation instability by source, a pre-specified test of whether stability predicts independent replication, and an explicit composition check, together and on one task.</p>
+    <p><strong>What it does not claim.</strong> It is not a new algorithm, not the first stable or leakage-safe selection method, and not a discovery of causal genes or validated biomarkers. Both cohorts share one microarray platform, so replication is independent-cohort, not independent-technology.</p>
+  </div>
+
+  <h5 id="rv-limits">6 Limits of this review</h5>
+  <ul class="lim">
+    <li>The review is not systematic: sources came from web searches and a repository audit by one reviewer, not from a protocol-driven search of bibliographic databases.</li>
+    <li>Several 2026 sources are preprints or come from a student journal (Sirohi, 2026; Barnard, 2026; Caraker et al., 2026) and have not been through conventional peer review.</li>
+    <li>The field is moving quickly, so the search should be repeated before submission to capture newer work.</li>
+  </ul>
+
+  <h5 id="rv-refs">References</h5>
+  <ul class="rv-refs">
+    <li>Barnard, A. S. (2026). RobustModelMaker: Coupling bootstrap stability selection with leakage-safe nested cross-validation for scientific machine learning. <em>arXiv</em>:2606.01566. <a href="https://arxiv.org/abs/2606.01566" target="_blank" rel="noopener">arxiv.org/abs/2606.01566</a></li>
+    <li>Bommert, A., Sun, X., Bischl, B., Rahnenführer, J., &amp; Lang, M. (2021). stabm: Stability measures for feature selection. <em>Journal of Open Source Software, 6</em>(59), 3010. <a href="https://doi.org/10.21105/joss.03010" target="_blank" rel="noopener">doi.org/10.21105/joss.03010</a></li>
+    <li>Caraker, D., Arnold, B., &amp; Rhoads, D. (2026). First-mover bias in gradient boosting explanations: Mechanism, detection, and resolution. <em>arXiv</em>:2603.22346. <a href="https://arxiv.org/abs/2603.22346" target="_blank" rel="noopener">arxiv.org/abs/2603.22346</a></li>
+    <li>Claborne, D., et al. (2026). Consistency of feature attribution in deep learning architectures for multi-omics. <em>Scientific Reports</em>. <a href="https://doi.org/10.1038/s41598-026-58312-5" target="_blank" rel="noopener">doi.org/10.1038/s41598-026-58312-5</a></li>
+    <li>Ein-Dor, L., Kela, I., Getz, G., Givol, D., &amp; Domany, E. (2005). Outcome signature genes in breast cancer: Is there a unique set? <em>Bioinformatics, 21</em>(2), 171–178. <a href="https://doi.org/10.1093/bioinformatics/bth469" target="_blank" rel="noopener">doi.org/10.1093/bioinformatics/bth469</a></li>
+    <li>Elloumi, F., et al. (2011). Systematic bias in genomic classification due to contaminating non-neoplastic tissue in breast tumor samples. <em>BMC Medical Genomics, 4</em>, 54. <a href="https://doi.org/10.1186/1755-8794-4-54" target="_blank" rel="noopener">doi.org/10.1186/1755-8794-4-54</a></li>
+    <li>Frontiers in Oncology (2020). Adipose tissue properties in tumor-bearing breasts. <a href="https://www.frontiersin.org/journals/oncology/articles/10.3389/fonc.2020.01506/full" target="_blank" rel="noopener">frontiersin.org</a></li>
+    <li>Haury, A.-C., Gestraud, P., &amp; Vert, J.-P. (2011). The influence of feature selection methods on accuracy, stability and interpretability of molecular signatures. <em>PLoS ONE</em> (arXiv:1101.5008). <a href="https://arxiv.org/abs/1101.5008" target="_blank" rel="noopener">arxiv.org/abs/1101.5008</a></li>
+    <li>Hédou, J., Marić, I., Bellan, G., et al. (2024). Discovery of sparse, reliable omic biomarkers with Stabl. <em>Nature Biotechnology</em>. <a href="https://doi.org/10.1038/s41587-023-02033-x" target="_blank" rel="noopener">doi.org/10.1038/s41587-023-02033-x</a></li>
+    <li>IEEE (2025). Integrating deep learning and SHAP for breast cancer classification and biomarker discovery using gene expression data. IEEE document 10930468. <a href="https://ieeexplore.ieee.org/document/10930468/" target="_blank" rel="noopener">ieeexplore.ieee.org/document/10930468</a></li>
+    <li>Krishna, S., Han, T., Gu, A., Pombra, J., Jabbari, S., Wu, Z. S., &amp; Lakkaraju, H. (2022). The disagreement problem in explainable machine learning: A practitioner’s perspective. <em>arXiv</em>:2202.01602. <a href="https://arxiv.org/abs/2202.01602" target="_blank" rel="noopener">arxiv.org/abs/2202.01602</a></li>
+    <li>Nogueira, S., Sechidis, K., &amp; Brown, G. (2018). On the stability of feature selection algorithms. <em>Journal of Machine Learning Research, 18</em>(174), 1–54. <a href="https://jmlr.org/papers/v18/17-514.html" target="_blank" rel="noopener">jmlr.org/papers/v18/17-514.html</a></li>
+    <li>Parvandeh, S., Yeh, H.-W., Paulus, M. P., &amp; McKinney, B. A. (2020). Consensus features nested cross-validation. <em>Bioinformatics, 36</em>(10), 3093–3098. <a href="https://doi.org/10.1093/bioinformatics/btaa046" target="_blank" rel="noopener">doi.org/10.1093/bioinformatics/btaa046</a></li>
+    <li>Shafik, R. A., Afify, Y. M., Badr, N., &amp; Mounir, M. (2026). Robust transcriptomic signatures of Alzheimer’s disease progression: A validated explainable AI approach. <em>Scientific Reports</em>. <a href="https://doi.org/10.1038/s41598-026-47879-8" target="_blank" rel="noopener">doi.org/10.1038/s41598-026-47879-8</a></li>
+    <li>Sirohi, I. (2026). High classification accuracy does not guarantee a stable gene signature: A selection-stability analysis of a compact RNA-seq cancer classifier. <em>NHSJS</em>. <a href="https://nhsjs.com/2026/high-classification-accuracy-does-not-guarantee-a-stable-gene-signature-a-selection-stability-analysis-of-a-compact-rna-seq-cancer-classifier/" target="_blank" rel="noopener">nhsjs.com</a></li>
+    <li>Yoshihara, K., et al. (2013). Inferring tumour purity and stromal and immune cell admixture from expression data. <em>Nature Communications, 4</em>, 2612. <a href="https://www.nature.com/articles/ncomms3612" target="_blank" rel="noopener">nature.com/articles/ncomms3612</a></li>
+    <li>Zuo, Y., Yang, S., &amp; Zhao, W. (2026). A systematic evaluation of explainable AI methods for high-dimensional transcriptome-based cancer survival prediction. <em>Frontiers in Physiology</em>. <a href="https://doi.org/10.3389/fphys.2026.1830956" target="_blank" rel="noopener">doi.org/10.3389/fphys.2026.1830956</a></li>
+    <li>Further records cited by title: Stability of feature selection in multi-omics data analysis (2024), <em>Applied Sciences, 14</em>(23), 11103, <a href="https://doi.org/10.3390/app142311103" target="_blank" rel="noopener">doi.org/10.3390/app142311103</a>; A stability-oriented biomarker selection framework driven by robust rank aggregation and L1-sparse modelling (2025), <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12735098/" target="_blank" rel="noopener">PMC12735098</a>; Stable feature selection utilizing graph convolutional neural network and layer-wise relevance propagation for biomarker discovery in breast cancer (2024), <a href="https://pubmed.ncbi.nlm.nih.gov/38658129/" target="_blank" rel="noopener">PubMed 38658129</a>; RoSHAP: A distributional framework and robust metric for stable feature attribution (2026), <a href="https://arxiv.org/abs/2605.15154" target="_blank" rel="noopener">arXiv:2605.15154</a>; Precision cancer classification and biomarker identification from mRNA gene expression via dimensionality reduction and explainable AI (2024), <a href="https://arxiv.org/abs/2410.07260" target="_blank" rel="noopener">arXiv:2410.07260</a>.</li>
+    <li>Software: Stabl, <a href="https://github.com/gregbellan/Stabl" target="_blank" rel="noopener">github.com/gregbellan/Stabl</a>; OmicSelector, <a href="https://github.com/kstawiski/OmicSelector" target="_blank" rel="noopener">github.com/kstawiski/OmicSelector</a>; OncoResolve-Breast-Cancer-Transcriptomics (2026), <a href="https://github.com/shubhamkjha369/OncoResolve-Breast-Cancer-Transcriptomics" target="_blank" rel="noopener">github.com/shubhamkjha369/OncoResolve-Breast-Cancer-Transcriptomics</a>.</li>
+  </ul>
+</article>
+    </div>
+    <div class="dpanel" id="panel-lit"></div>
+    <div class="dpanel" id="panel-repo"></div>
+    <div class="dpanel" id="panel-gap"></div>
+  </div>
+</aside>
+
+<script>
+/* ---------- helpers ---------- */
+var fine = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
+var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
+
+/* ---------- reveal + bar fills + flow trigger ---------- */
+(function(){
+  var targets=document.querySelectorAll('.reveal,#f1bars,#flow');
+  if(!('IntersectionObserver' in window)){ targets.forEach(function(e){e.classList.add('in')}); return; }
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  },{threshold:.14, rootMargin:'0px 0px -4% 0px'});
+  targets.forEach(function(e){io.observe(e)});
+})();
+
+/* ---------- count-up ---------- */
+(function(){
+  var nums=document.querySelectorAll('[data-count]');
+  function run(el){
+    var to=parseInt(el.getAttribute('data-count'),10), of=el.getAttribute('data-of'), t0=null, dur=1000;
+    function tick(ts){ if(!t0) t0=ts; var p=Math.min(1,(ts-t0)/dur), e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(e*to)+(of?' / '+of:''); if(p<1) requestAnimationFrame(tick); }
+    requestAnimationFrame(tick);
+  }
+  if(reduce||!('IntersectionObserver' in window)) return;
+  var io=new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting){ run(en.target); io.unobserve(en.target); } }); },{threshold:.7});
+  nums.forEach(function(n){io.observe(n)});
+})();
+
+/* ---------- cursor spotlight + tilt ---------- */
+(function(){
+  if(!fine) return;
+  document.querySelectorAll('.spot').forEach(function(el){
+    el.addEventListener('pointermove',function(e){ var r=el.getBoundingClientRect(); el.style.setProperty('--mx',(e.clientX-r.left)+'px'); el.style.setProperty('--my',(e.clientY-r.top)+'px'); });
+  });
+  document.querySelectorAll('.tilt').forEach(function(el){
+    el.addEventListener('pointermove',function(e){ var r=el.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+      el.style.setProperty('--ry',(x*7).toFixed(2)+'deg'); el.style.setProperty('--rx',(-y*7).toFixed(2)+'deg'); });
+    el.addEventListener('pointerleave',function(){ el.style.setProperty('--rx','0deg'); el.style.setProperty('--ry','0deg'); });
+  });
+})();
+
+/* ---------- hero: rank-instability ribbons ---------- */
+(function(){
+  var cv=document.getElementById('rankCanvas'); if(!cv||!cv.getContext) return;
+  var ctx=cv.getContext('2d');
+  var COLS=['LR·coef','SVM·perm','RF·SHAP','XGB·SHAP','t-test'];
+  var NAMES=['DKFZp779M0652','ABHD1','LYVE1','MMP28','DMGDH','FLVCR1','NIPSNAP3B','RAE1','HSPB6','LOC102723493','LOC284825','PQLC2L','ZNRF2P1','ABCD2','CELSR1','SLC7A10'];
+  var N=NAMES.length, K=6, TWEEN=1250, HOLD=1700;
+  var genes=NAMES.map(function(n,i){ return {name:n, base:i===0?1.2:(0.92-i*0.046), sigma:i===0?0.2:0.44}; });
+  var prev=[], cur=[], t0=0, W=0, H=0, dpr=1, raf=null, vis=true;
+  var LIME='#B9D175', MINT='#D9EFBD', CREAM='#F5FBDA';
+  function rnd(){ return (Math.random()+Math.random()+Math.random()-1.5)/1.5; }
+  function rankCol(){ var s=genes.map(function(g,i){return {i:i,v:g.base+rnd()*g.sigma}}); s.sort(function(a,b){return b.v-a.v}); var r=new Array(N); s.forEach(function(o,k){r[o.i]=k}); return r; }
+  function overlap(){
+    var sum=0,cnt=0;
+    for(var a=0;a<COLS.length;a++) for(var b=a+1;b<COLS.length;b++){
+      var inter=0,uni=0;
+      for(var g=0;g<N;g++){ var A=cur[a][g]<K, B=cur[b][g]<K; if(A&&B) inter++; if(A||B) uni++; }
+      sum+=inter/uni; cnt++;
+    }
+    var v=Math.round(sum/cnt*100);
+    var o=document.getElementById('ovl'), bar=document.getElementById('ovlBar');
+    if(o) o.textContent=v+'%'; if(bar) bar.style.width=v+'%';
+  }
+  function resample(){
+    prev=cur.length?cur.map(function(c){return c.slice()}):null;
+    cur=COLS.map(rankCol);
+    if(!prev) prev=cur.map(function(c){return c.slice()});
+    t0=performance.now(); overlap();
+  }
+  function size(){
+    var r=cv.getBoundingClientRect(); dpr=Math.min(2,window.devicePixelRatio||1);
+    W=r.width; H=r.height; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function ease(t){ return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
+  function draw(now){
+    var small=W<420, fpx=small?9:9.5, top=small?30:34, bot=small?10:12, padR=small?20:22;
+    ctx.font='600 '+fpx+'px "Geist Mono",ui-monospace,monospace';
+    var padL=Math.ceil(ctx.measureText('DKFZp779M0652').width)+26;
+    var t=Math.min(1,(now-t0)/TWEEN), e=ease(t);
+    function X(c){return padL+c*(W-padL-padR)/(COLS.length-1)}
+    function Y(r){return top+r*(H-top-bot)/(N-1)}
+    function P(c,g){return prev[c][g]+(cur[c][g]-prev[c][g])*e}
+    ctx.clearRect(0,0,W,H);
+    var by0=Y(-.5), by1=Y(K-.5);
+    ctx.fillStyle='rgba(185,209,117,0.09)'; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(padL-14,by0,W-padL-padR+28,by1-by0,10); else ctx.rect(padL-14,by0,W-padL-padR+28,by1-by0); ctx.fill();
+    ctx.setLineDash([3,4]); ctx.strokeStyle='rgba(185,209,117,0.45)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL-14,by1); ctx.lineTo(W-padR+14,by1); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font='500 '+fpx+'px "Geist Mono",ui-monospace,monospace'; ctx.textBaseline='middle';
+    ctx.textAlign='center'; ctx.fillStyle='rgba(245,251,218,0.78)';
+    for(var c=0;c<COLS.length;c++){ var tw=ctx.measureText(COLS[c]).width; ctx.fillText(COLS[c],Math.min(Math.max(X(c),tw/2+2),W-tw/2-2),12); }
+    var order=[]; for(var g=1;g<N;g++) order.push(g); order.push(0);
+    order.forEach(function(g){
+      var hero=g===0;
+      for(var c=0;c<COLS.length-1;c++){
+        var y0=Y(P(c,g)), y1=Y(P(c+1,g)), x0=X(c), x1=X(c+1), mx=(x0+x1)/2;
+        var agree=cur[c][g]<K&&cur[c+1][g]<K;
+        ctx.beginPath(); ctx.moveTo(x0,y0); ctx.bezierCurveTo(mx,y0,mx,y1,x1,y1);
+        if(hero){ ctx.strokeStyle=LIME; ctx.lineWidth=3.4; ctx.shadowColor=LIME; ctx.shadowBlur=14; }
+        else if(agree){ ctx.strokeStyle='rgba(217,239,189,0.9)'; ctx.lineWidth=2; ctx.shadowBlur=0; }
+        else { ctx.strokeStyle='rgba(245,251,218,0.2)'; ctx.lineWidth=1.1; ctx.shadowBlur=0; }
+        ctx.stroke(); ctx.shadowBlur=0;
+      }
+      for(var c2=0;c2<COLS.length;c2++){
+        var inK=cur[c2][g]<K, yy=Y(P(c2,g));
+        ctx.beginPath(); ctx.arc(X(c2),yy,hero?5:(inK?3.6:2.4),0,6.283);
+        ctx.fillStyle=hero?LIME:(inK?MINT:'rgba(245,251,218,0.5)'); ctx.fill();
+      }
+    });
+    ctx.textAlign='right';
+    for(var g2=0;g2<N;g2++){
+      var yl=Y(P(0,g2)), isHero=g2===0, inK0=cur[0][g2]<K;
+      ctx.font=(isHero?'600':'500')+' '+fpx+'px "Geist Mono",ui-monospace,monospace';
+      ctx.fillStyle=isHero?LIME:(inK0?CREAM:'rgba(245,251,218,0.66)');
+      ctx.fillText(genes[g2].name,padL-14,yl);
+    }
+  }
+  function frame(now){
+    if(!vis){ raf=null; return; }
+    if(now-t0>TWEEN+HOLD) resample();
+    draw(now); raf=requestAnimationFrame(frame);
+  }
+  size(); resample(); draw(t0+TWEEN+1);
+  if('ResizeObserver' in window) new ResizeObserver(function(){ size(); draw(performance.now()); }).observe(cv);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ draw(performance.now()); });
+  if(reduce) return;
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){ vis=es[0].isIntersecting; if(vis&&!raf) raf=requestAnimationFrame(frame); },{threshold:.05}).observe(cv);
+  }
+  raf=requestAnimationFrame(frame);
+})();
+
+/* ---------- pipeline: self-drawing connectors ---------- */
+(function(){
+  var flow=document.getElementById('flow'); if(!flow) return;
+  var nodes=[].slice.call(flow.querySelectorAll('.node'));
+  var NS='http://www.w3.org/2000/svg', svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('class','flow-svg'); svg.setAttribute('aria-hidden','true'); flow.appendChild(svg);
+  var edges=[];
+  nodes.forEach(function(n,i){ n.style.setProperty('--d',(i*0.32)+'s'); });
+  function pt(el,side,host){
+    var r=el.getBoundingClientRect();
+    if(side==='r') return {x:r.right-host.left,y:r.top+r.height/2-host.top};
+    if(side==='l') return {x:r.left-host.left,y:r.top+r.height/2-host.top};
+    if(side==='b') return {x:r.left-host.left+35,y:r.bottom-host.top};
+    return {x:r.left-host.left+35,y:r.top-host.top};
+  }
+  function build(){
+    var h=flow.getBoundingClientRect();
+    svg.setAttribute('width',h.width); svg.setAttribute('height',h.height); svg.setAttribute('viewBox','0 0 '+h.width+' '+h.height);
+    svg.innerHTML=''; edges=[];
+    var horiz=nodes.length>1 && Math.abs(nodes[1].getBoundingClientRect().left-nodes[0].getBoundingClientRect().left)>40;
+    for(var i=0;i<nodes.length-1;i++){
+      var a=nodes[i], b=nodes[i+1], p1,p2,d;
+      if(horiz){
+        var right=b.getBoundingClientRect().left>a.getBoundingClientRect().left;
+        p1=pt(a,right?'r':'l',h); p2=pt(b,right?'l':'r',h);
+        var mx=(p1.x+p2.x)/2; d='M'+p1.x+','+p1.y+' C'+mx+','+p1.y+' '+mx+','+p2.y+' '+p2.x+','+p2.y;
+      } else {
+        p1=pt(a,'b',h); p2=pt(b,'t',h); d='M'+p1.x+','+p1.y+' L'+p2.x+','+p2.y;
+      }
+      var base=document.createElementNS(NS,'path'); base.setAttribute('d',d); base.setAttribute('class','e-base'); svg.appendChild(base);
+      var dr=document.createElementNS(NS,'path'); dr.setAttribute('d',d); dr.setAttribute('class','e-draw'); svg.appendChild(dr);
+      var len=Math.ceil(dr.getTotalLength())+2;
+      dr.style.strokeDasharray=len; dr.style.setProperty('--d',(i*0.32+0.35)+'s');
+      dr.style.strokeDashoffset=flow.classList.contains('in')?0:len;
+      var pk=document.createElementNS(NS,'path'); pk.setAttribute('d',d); pk.setAttribute('class','e-pkt');
+      pk.style.strokeDasharray='12 '+(len+40); pk.style.setProperty('--len',len+12); pk.style.setProperty('--k',i); svg.appendChild(pk);
+      [p1,p2].forEach(function(p){ var c=document.createElementNS(NS,'circle'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',4.5); c.setAttribute('class','port'); c.style.setProperty('--d',(i*0.32+0.1)+'s'); svg.appendChild(c); });
+      edges.push({draw:dr,len:len});
+    }
+  }
+  function reveal(){ edges.forEach(function(e){ e.draw.style.strokeDashoffset=0; }); setTimeout(function(){ flow.classList.add('running'); }, nodes.length*320+900); }
+  function hot(i,on){ [i-1,i].forEach(function(k){ if(edges[k]) edges[k].draw.classList.toggle('hot',on); }); }
+  nodes.forEach(function(n,i){ n.addEventListener('mouseenter',function(){hot(i,true)}); n.addEventListener('mouseleave',function(){hot(i,false)}); n.addEventListener('focusin',function(){hot(i,true)}); n.addEventListener('focusout',function(){hot(i,false)}); n.tabIndex=0; });
+  build();
+  var done=false;
+  new MutationObserver(function(){ if(flow.classList.contains('in')&&!done){ done=true; requestAnimationFrame(reveal); } }).observe(flow,{attributes:true,attributeFilter:['class']});
+  if(flow.classList.contains('in')){ done=true; reveal(); }
+  var rt; function rebuild(){ clearTimeout(rt); rt=setTimeout(function(){ var wasLive=flow.classList.contains('live'); build(); if(done){ edges.forEach(function(e){e.draw.style.strokeDashoffset=0}); } },120); }
+  if('ResizeObserver' in window) new ResizeObserver(rebuild).observe(flow); else window.addEventListener('resize',rebuild);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(rebuild);
+})();
+
+/* ---------- marquee clone ---------- */
+(function(){
+  var mq=document.getElementById('mq'); if(!mq) return;
+  var set=mq.querySelector('.mq-set'); var c=set.cloneNode(true); c.setAttribute('aria-hidden','true'); mq.appendChild(c);
+})();
+
+/* ---------- copy email ---------- */
+(function(){
+  var b=document.getElementById('copyMail'), t=document.getElementById('toast'), txt='hirabaig1357@gmail.com';
+  if(!b) return;
+  function say(m){ t.textContent=m; t.classList.add('on'); setTimeout(function(){t.classList.remove('on')},1800); }
+  b.addEventListener('click',function(){
+    var done=false;
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){say('Copied')},function(){sel()}); done=true; } }catch(e){}
+    if(!done) sel();
+    function sel(){ var r=document.createRange(); r.selectNodeContents(document.getElementById('emailText')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); say('Press Ctrl+C'); }
+  });
+})();
+
+/* ---------- literature drawer ---------- */
+(function(){
+  var LIT=[
+    {id:'L01',title:'High Classification Accuracy Does Not Guarantee a Stable Gene Signature',authors:'Sirohi, I.',year:'2026',venue:'NHSJS',url:'https://nhsjs.com/2026/high-classification-accuracy-does-not-guarantee-a-stable-gene-signature-a-selection-stability-analysis-of-a-compact-rna-seq-cancer-classifier/',finding:'99%+ accuracy on TCGA, yet only 14 of 75 panel genes selected in ≥80% of resamples.',tag:'High overlap',hot:true},
+    {id:'L02',title:'Discovery of sparse, reliable omic biomarkers with Stabl',authors:'Hédou, J. et al.',year:'2024',venue:'Nature Biotechnology',url:'https://doi.org/10.1038/s41587-023-02033-x',finding:'Noise-injection stability selection gives sparser, more reliable signatures than lasso/elastic-net at matched performance.',tag:'Comparator (BSD-3)',hot:true},
+    {id:'L03',title:'On the Stability of Feature Selection Algorithms',authors:'Nogueira, S.; Sechidis, K.; Brown, G.',year:'2018',venue:'JMLR 18(174)',url:'https://jmlr.org/papers/v18/17-514.html',finding:'Defines the chance-corrected Φ stability estimator used throughout BioXplain.',tag:'Foundational'},
+    {id:'L04',title:'stabm: Stability Measures for Feature Selection',authors:'Bommert, A. et al.',year:'2021',venue:'JOSS 6(59)',url:'https://doi.org/10.21105/joss.03010',finding:'Reference R implementation of 20 stability measures; used to cross-check our Nogueira Φ.',tag:'Metric reference'},
+    {id:'L05',title:'Consensus features nested cross-validation',authors:'Parvandeh, S. et al.',year:'2020',venue:'Bioinformatics 36(10)',url:'https://doi.org/10.1093/bioinformatics/btaa046',finding:'Cross-fold consensus as a selection criterion: prior art for “consensus across folds”.',tag:'Prior art'},
+    {id:'L06',title:'Outcome signature genes in breast cancer: is there a unique set?',authors:'Ein-Dor, L. et al.',year:'2005',venue:'Bioinformatics 21(2)',url:'https://doi.org/10.1093/bioinformatics/bth469',finding:'Overlap between published breast-outcome signatures is almost zero: instability is a 20-year-old problem.',tag:'Motivation',hot:true},
+    {id:'L07',title:'Influence of feature selection methods on accuracy, stability and interpretability',authors:'Haury, A-C.; Gestraud, P.; Vert, J-P.',year:'2011',venue:'arXiv 1101.5008',url:'https://arxiv.org/abs/1101.5008',finding:'A simple t-test filter is often as stable as complex selectors, which motivated our Welch-t baseline.',tag:'High overlap'},
+    {id:'L08',title:'Robust transcriptomic signatures of Alzheimer’s disease progression',authors:'Shafik, R.A. et al.',year:'2026',venue:'Scientific Reports',url:'https://doi.org/10.1038/s41598-026-47879-8',finding:'Single-model XGBoost+SHAP study with an ad hoc 0.4/0.3/0.3 composite score: an example of what to avoid.',tag:'Cautionary'},
+    {id:'L09',title:'Systematic evaluation of explainable AI methods for transcriptome-based survival prediction',authors:'Zuo, Y.; Yang, S.; Zhao, W.',year:'2026',venue:'Frontiers in Physiology',url:'https://doi.org/10.3389/fphys.2026.1830956',finding:'Permutation importance failed under collinearity in neural nets, as predicted (and observed) in our own data.',tag:'Direct precedent',hot:true},
+    {id:'L10',title:'Consistency of feature attribution in deep learning architectures for multi-omics',authors:'Claborne, D. et al.',year:'2026',venue:'Scientific Reports',url:'https://doi.org/10.1038/s41598-026-58312-5',finding:'SHAP rankings unstable across architecture and random seed in multi-omics deep nets.',tag:'Supports need'},
+    {id:'L11',title:'First-Mover Bias in Gradient Boosting Explanations',authors:'Caraker, D.; Arnold, B.; Rhoads, D.',year:'2026',venue:'arXiv 2603.22346',url:'https://arxiv.org/abs/2603.22346',finding:'XGBoost SHAP is unstable under multicollinearity (ρ≥0.7); seed-averaging restores stability.',tag:'Preprint'},
+    {id:'L12',title:'RobustModelMaker: Bootstrap Stability Selection + Leakage-Safe Nested CV',authors:'Barnard, A.S.',year:'2026',venue:'arXiv 2606.01566',url:'https://arxiv.org/abs/2606.01566',finding:'Direct Python software competitor for leakage-safe stable selection: cannot claim “first”.',tag:'Competitor',hot:true},
+    {id:'L13',title:'Precision Cancer Classification via Dimensionality Reduction and XAI',authors:'n/a',year:'2024',venue:'arXiv 2410.07260',url:'https://arxiv.org/abs/2410.07260',finding:'Represents the “high accuracy + SHAP top genes” genre BioXplain is designed to go beyond.',tag:'Genre example'},
+    {id:'L14',title:'Integrating Deep Learning and SHAP for Breast Cancer Biomarker Discovery',authors:'n/a',year:'2025',venue:'IEEE',url:'https://ieeexplore.ieee.org/document/10930468/',finding:'Reports 0.99+ accuracy using GSE42568 externally: near-ceiling accuracy is routine on this cohort.',tag:'Benchmark'},
+    {id:'L15',title:'Stable feature selection via GCNN + Layer-wise Relevance Propagation',authors:'n/a',year:'2024',venue:'PubMed 38658129',url:'https://pubmed.ncbi.nlm.nih.gov/38658129/',finding:'GCNN+LRP produced more stable breast-cancer gene lists than SHAP-based selection.',tag:'Evidence'},
+    {id:'L16',title:'Systematic Bias from Contaminating Non-neoplastic Tissue in Breast Tumor Samples',authors:'Elloumi, F. et al.',year:'2011',venue:'BMC Medical Genomics 4:54',url:'https://doi.org/10.1186/1755-8794-4-54',finding:'Normal-tissue contamination systematically shifts genomic classifiers: the seed of our composition check.',tag:'Critical caveat',hot:true},
+    {id:'L17',title:'Rank aggregation across feature-ranking / explanation methods',authors:'various',year:'2012–2025',venue:'multiple',url:'#',finding:'Consensus by rank aggregation exists elsewhere; we deliberately use transparent frequency counts instead.',tag:'Related'},
+    {id:'L18',title:'The Disagreement Problem in Explainable Machine Learning',authors:'Krishna, S. et al.',year:'2022',venue:'arXiv 2202.01602',url:'https://arxiv.org/abs/2202.01602',finding:'Explanation methods routinely disagree on ranking and direction: the general case our explainer-dimension result extends to transcriptomics.',tag:'Direct precedent',hot:true},
+    {id:'L19',title:'Stability of Feature Selection in Multi-Omics Data Analysis',authors:'n/a',year:'2024',venue:'Applied Sciences 14(23)',url:'https://doi.org/10.3390/app142311103',finding:'Stability generally rises with stronger regularisation; our own result is non-monotone (C=1 is the low point).',tag:'Contrast'},
+    {id:'L20',title:'Stability-Oriented Biomarker Selection via Rank Aggregation + L1',authors:'n/a',year:'2025',venue:'PMC12735098',url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC12735098/',finding:'Most methods optimise accuracy and treat stability as a post-hoc diagnostic, not a design goal.',tag:'Related'},
+    {id:'L21',title:'RoSHAP: A Robust Metric for Stable Feature Attribution',authors:'n/a',year:'2026',venue:'arXiv 2605.15154',url:'https://arxiv.org/abs/2605.15154',finding:'Proposes a new SHAP-stability metric; BioXplain deliberately does not propose a new metric of its own.',tag:'Related'},
+    {id:'L22',title:'Inferring tumour purity and stromal/immune admixture (ESTIMATE)',authors:'Yoshihara, K. et al.',year:'2013',venue:'Nature Communications 4:2612',url:'https://www.nature.com/articles/ncomms3612',finding:'Expression tissue is a mixture of cell types whose purity varies and confounds analysis: background for the composition hypothesis.',tag:'Background'},
+    {id:'L23',title:'Adipose Tissue Properties in Tumor-Bearing Breasts',authors:'n/a',year:'2020',venue:'Frontiers in Oncology',url:'https://www.frontiersin.org/journals/oncology/articles/10.3389/fonc.2020.01506/full',finding:'Adipose tissue is a major component of breast stroma: grounds the adipocyte marker panel used in Finding 05.',tag:'Background'}
+  ];
+  var REPOS=[
+    {name:'Stabl',lang:'Python',lic:'BSD-3-Clause-Clear',note:'Noise-injection stability selection; sklearn-compatible. Comparator, not code source.'},
+    {name:'OmicSelector',lang:'R',lic:'MIT*',note:'Nested CV, zero-leakage selection, Nogueira index. Closest feature-set competitor.'},
+    {name:'BioDiscML',lang:'Java',lic:'GPL-3.0',note:'Automated biomarker signature search across many selectors. GPL: cannot be incorporated.'},
+    {name:'RobustModelMaker',lang:'Python',lic:'MIT',note:'Bootstrap stability selection + leakage-safe nested CV. Same core idea in Python; cited, not copied.'},
+    {name:'isirohi-research',lang:'Python',lic:'MIT',note:'Panel-stability analysis on TCGA/CPTAC. Same core premise, no SHAP.'},
+    {name:'OncoResolve-Breast-Cancer-Transcriptomics',lang:'Notebooks',lic:'MIT',note:'PAM50 + SHAP + 4-cohort external validation. Closest neighbour overall; different task (subtyping).'},
+    {name:'Boruta-Shap',lang:'Python',lic:'MIT',note:'Boruta selection with SHAP importance. Single-run: no stability reporting.'},
+    {name:'stability-selection',lang:'Python',lic:'BSD-3-Clause',note:'Meinshausen–Bühlmann stability selection. Archived; not depended on.'},
+    {name:'stabm',lang:'R',lic:'LGPL-3.0',note:'20 stability measures, used to validate and never to copy from.'},
+    {name:'GSEApy',lang:'Python',lic:'BSD-3-Clause',note:'Enrichr + GSEA access. Used directly as a dependency.'},
+    {name:'shap',lang:'Python',lic:'MIT',note:'SHAP reference implementation. Used directly as a dependency.'},
+    {name:'EvoXplain',lang:'Python',lic:'AGPL-3.0',note:'Explanation multiplicity across training runs. AGPL: not reused.'},
+    {name:'JMLR2018 (Nogueira reference code)',lang:'Notebooks',lic:'None stated',note:'No licence stated, so Φ was re-implemented from the paper’s formula instead of copied.'}
+  ];
+  var GAPS=[
+    {a:'“Stability analysis is what differentiates BioXplain”',v:'no',ev:'Sirohi 2026 · Stabl 2024 · OmicSelector · RobustModelMaker · Ein-Dor 2005'},
+    {a:'“A leakage-safe pipeline is itself a contribution”',v:'no',ev:'OmicSelector, RobustModelMaker and OncoResolve all already claim this'},
+    {a:'“Cross-model consensus is a new idea”',v:'part',ev:'OncoResolve (≥2/3 vote), Shafik 2026 (ad hoc weights), rank-aggregation literature'},
+    {a:'“SHAP explanations are sufficient on their own”',v:'part',ev:'Caraker 2026, Claborne 2026, Zuo 2026: SHAP rankings unstable under collinearity and seed'},
+    {a:'“High accuracy on GSE42568 is informative”',v:'no',ev:'An IEEE 2025 paper already reports 0.99 externally on this exact cohort'},
+    {a:'“External validation adds strength”',v:'part',ev:'Yes, but OncoResolve (4 cohorts) and Sirohi (CPTAC) already do this'},
+    {a:'“Pathway enrichment adds biological meaning”',v:'part',ev:'Elloumi 2011: tissue-composition confounding can fully explain an enriched list'}
+  ];
+  document.getElementById('panel-lit').innerHTML='<p class="d-intro">23 sources logged before implementation, each recorded against a fixed template and rated for overlap with BioXplain’s own claims. Highlighted tags mark the sources that most changed the plan.</p>'+
+    LIT.map(function(l){
+      return '<div class="li"><div class="li-top"><h4>'+esc(l.title)+'</h4><span class="meta">'+l.id+' · '+esc(l.year)+'</span></div>'+
+        '<div class="auth">'+esc(l.authors)+' · <i>'+esc(l.venue)+'</i></div><div class="find">'+esc(l.finding)+'</div>'+
+        '<div class="row"><span class="dp'+(l.hot?' hot':'')+'">'+esc(l.tag)+'</span>'+(l.url&&l.url!=='#'?'<a class="src" href="'+esc(l.url)+'" target="_blank" rel="noopener">'+esc(l.url.replace('https://','').slice(0,58))+(l.url.length>66?'…':'')+' ↗</a>':'')+'</div></div>';
+    }).join('');
+  document.getElementById('panel-repo').innerHTML='<p class="d-intro">13 repositories audited for overlap and licence compatibility before any code was written. Nothing was copied; permissive dependencies (GSEApy, SHAP) are used through pip only.</p>'+
+    REPOS.map(function(r){ return '<div class="rrow2"><div class="rn">'+esc(r.name)+'</div><div class="rm"><span>'+esc(r.lang)+'</span><span>'+esc(r.lic)+'</span></div><div class="rd">'+esc(r.note)+'</div></div>'; }).join('');
+  document.getElementById('panel-gap').innerHTML='<p class="d-intro">Every assumption in the original project draft, tested against the evidence before implementation began.</p>'+
+    GAPS.map(function(g){ return '<div class="garow"><div class="as">'+esc(g.a)+'</div><div><span class="vb '+g.v+'">'+(g.v==='no'?'Not novel':'Partly novel')+'</span></div><div class="ev">'+esc(g.ev)+'</div></div>'; }).join('');
+
+  var scrim=document.getElementById('scrim'), drawer=document.getElementById('drawer'), closeB=document.getElementById('dClose'), body=document.getElementById('dBody'), last=null;
+  var tabs=[].slice.call(document.querySelectorAll('.dtab'));
+  function setTab(name){
+    tabs.forEach(function(t){ t.setAttribute('aria-selected',t.getAttribute('data-tab')===name?'true':'false'); });
+    [].forEach.call(document.querySelectorAll('.dpanel'),function(p){ p.classList.toggle('active',p.id==='panel-'+name); });
+    body.scrollTop=0;
+  }
+  function open(tab){ last=document.activeElement; setTab(tab||'review'); scrim.classList.add('open'); drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; setTimeout(function(){closeB.focus()},60); }
+  function close(){ scrim.classList.remove('open'); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); document.body.style.overflow=''; if(last&&last.focus) last.focus(); }
+  [].forEach.call(document.querySelectorAll('.open-lit'),function(b){ b.addEventListener('click',function(){ open(b.getAttribute('data-tab')); }); });
+  closeB.addEventListener('click',close); scrim.addEventListener('click',close);
+  tabs.forEach(function(t){ t.addEventListener('click',function(){ setTab(t.getAttribute('data-tab')); }); });
+  [].forEach.call(document.querySelectorAll('.rv-toc a'),function(a){
+    a.addEventListener('click',function(e){ e.preventDefault(); var el=document.getElementById(a.getAttribute('data-rv')); if(el) el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}); });
+  });
+  var cp=document.getElementById('rvCopy'), ts=document.getElementById('rvToast');
+  function say(m){ ts.textContent=m; ts.classList.add('on'); setTimeout(function(){ts.classList.remove('on')},2200); }
+  cp.addEventListener('click',function(){
+    var txt=document.getElementById('rvText').innerText.replace(/Copy review as text\s*/,'');
+    var done=false;
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){say('Copied to clipboard')},function(){sel()}); done=true; } }catch(e){}
+    if(!done) sel();
+    function sel(){ var r=document.createRange(); r.selectNodeContents(document.getElementById('rvText')); var s=getSelection(); s.removeAllRanges(); s.addRange(r); say('Selected: press Ctrl+C'); }
+  });
+  document.addEventListener('keydown',function(e){
+    if(!drawer.classList.contains('open')) return;
+    if(e.key==='Escape') close();
+    if(e.key==='Tab'){
+      var f=[].slice.call(drawer.querySelectorAll('button,a[href]')).filter(function(x){return x.offsetParent!==null});
+      if(!f.length) return; var a=f[0], z=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===a){ e.preventDefault(); z.focus(); }
+      else if(!e.shiftKey&&document.activeElement===z){ e.preventDefault(); a.focus(); }
+    }
+  });
+})();
+</script>
+</body>
+</html>

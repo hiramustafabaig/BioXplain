@@ -2,6 +2,10 @@
 
 An empirical study — and a tested, reproducible Python workflow — of how consistently machine-learning explanations identify gene-expression features across models, explainers and resampling, and whether that internal stability predicts replication in an independent breast-tissue cohort.
 
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white) ![Tests](https://img.shields.io/badge/tests-160%20passing-B9D175) ![Status](https://img.shields.io/badge/status-research%20portfolio-450C3F) ![Not peer reviewed](https://img.shields.io/badge/peer%20review-not%20peer%20reviewed-lightgrey)
+
+**Explore it:** the [showcase page](site/index.html) (findings, pipeline and an in-page literature reader) · the written [literature review (PDF)](docs/research/BioXplain_Literature_Review.pdf), also as [Word](docs/research/BioXplain_Literature_Review.docx) · the [full report](docs/reports/final_report.md).
+
 **Full report:** [docs/reports/final_report.md](docs/reports/final_report.md). **Results tables/figures:** [docs/results/results_summary.md](docs/results/results_summary.md), `results/figures/`. **Methodology (22 pre-specified decisions, written before results):** [docs/methodology_decisions.md](docs/methodology_decisions.md). **Discovery freeze:** [docs/freeze/discovery_freeze.md](docs/freeze/discovery_freeze.md). **Limitations:** [docs/limitations.md](docs/limitations.md). **Reproduce it:** [docs/reproducibility.md](docs/reproducibility.md).
 
 ## Why this exists
@@ -24,6 +28,19 @@ Both from NCBI GEO, GPL570 (Affymetrix HG-U133 Plus 2.0): **GSE42568** (discover
 - Internal stability shows a small but bootstrap-distinguishable association with independent-cohort gene-level replication, beyond discovery effect size alone (partial Spearman ≈ 0.08).
 - A composite signature from the most stable genes replicates strongly at the signature level externally — but a large share of that appears attributable to a tissue-composition-associated signal, not confirmed tumour-specific biology.
 - No enrichment term survives correction.
+
+## Repository layout
+
+| Path | What it holds |
+|---|---|
+| `src/bioxplain/` | The package: data loading, leakage-safe preprocessing, models, explainers, stability metrics, permutation null, consensus, freeze, external replication, enrichment and composition checks |
+| `scripts/` | Runnable entry points for each stage (matrix runs, null, freeze, external validation, enrichment, figures) |
+| `configs/` | YAML run configurations and `data_manifest.json` (official download URLs and SHA-256 hashes) |
+| `tests/` | The pytest suite, including deliberate leakage tests |
+| `results/` | Saved result tables, rankings and figures that the report's numbers are read from |
+| `docs/` | Report, methodology decisions, discovery freeze, limitations, reproducibility notes and the literature review (`docs/research/`) |
+| `site/` | A standalone showcase web page (`site/index.html`) summarising what was done and found |
+| `notebooks/` | Data exploration |
 
 ## Reproduce it
 
