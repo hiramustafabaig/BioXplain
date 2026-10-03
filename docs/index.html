@@ -34,6 +34,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+html,body{overflow-anchor:none}
 body{margin:0; background:var(--plum); color:var(--cream); font-family:var(--sans); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
 h1,h2,h3,h4,p,ul{margin:0}
 ul{padding:0; list-style:none}
@@ -1160,6 +1161,19 @@ h1 em path{stroke:var(--lime); stroke-width:3.5; fill:none; stroke-linecap:round
 </aside>
 
 <script>
+/* ---------- always open at the top (no restored scroll position) ---------- */
+(function(){
+  try{ if('scrollRestoration' in history) history.scrollRestoration='manual'; }catch(e){}
+  if(location.hash && location.hash.length>1) return;
+  var moved=false;
+  ['wheel','touchstart','keydown','mousedown'].forEach(function(ev){ window.addEventListener(ev,function(){ moved=true; },{passive:true,once:true}); });
+  function toTop(){ if(!moved && window.scrollY>0) window.scrollTo({top:0,left:0,behavior:'instant'}); }
+  toTop();
+  window.addEventListener('load',function(){ toTop(); setTimeout(toTop,250); setTimeout(toTop,1000); });
+  window.addEventListener('pageshow',function(e){ if(e.persisted){ window.scrollTo({top:0,left:0,behavior:'instant'}); } });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(toTop);
+})();
+
 /* ---------- helpers ---------- */
 var fine = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
 var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
